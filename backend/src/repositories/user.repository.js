@@ -20,7 +20,8 @@ class UserRepository {
                     phone: true,
                     address: true,
                     avatar: true,
-                    role: true
+                    role: true,
+                    token: true
                 }
             });
         } catch (err) {

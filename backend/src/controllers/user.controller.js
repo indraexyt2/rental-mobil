@@ -21,6 +21,7 @@ class UserController {
             }
 
             value.password = await bcrypt.hash(value.password, 10);
+            value.token = Math.floor(100000 + Math.random() * 900000);
             const newUser = await this.userRepo.addUser(value);
             return res.status(200).json({
                 "message": "Pendaftan berhasil!",
