@@ -1,7 +1,5 @@
 import {prismaClient} from "../config/database.config.js";
-import {logger} from "../utils/logger.js";
 import {ResponseError} from "../error/response.error.js";
-import e from "express";
 
 class UserRepository {
     constructor(dbClient = prismaClient) {
