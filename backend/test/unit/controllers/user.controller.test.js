@@ -52,7 +52,8 @@ describe('UserController', () => {
                 id: 1,
                 email: value.email,
                 name: value.name,
-                password: hashedPassword
+                password: hashedPassword,
+                token: Math.floor(100000 + Math.random() * 900000)
             };
             userRepository.addUser = jest.fn().mockResolvedValue(mockNewUser);
 

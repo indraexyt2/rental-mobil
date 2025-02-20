@@ -19,7 +19,8 @@ describe('User Repository', () => {
             phone: null,
             address: null,
             avatar: null,
-            role: null
+            role: null,
+            token: 565279
         };
 
         repository.addUser.mockResolvedValue(expectedUser);
