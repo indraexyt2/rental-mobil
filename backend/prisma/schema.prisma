@@ -14,21 +14,22 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  email       String   @unique @db.VarChar(100)
-  password    String   @db.VarChar(255)
-  full_name   String   @db.VarChar(100)
-  phone       String?  @db.VarChar(50)
-  address     String?  @db.Text
-  sim_number  String?  @db.VarChar(50)
-  sim_image   String?  @db.Text
-  avatar      String?  @db.Text
-  role        Role     @default(USER)
-  is_verified Boolean  @default(false)
-  token       Int?
-  rentals     Rental[]
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id            Int       @id @default(autoincrement())
+  email         String    @unique @db.VarChar(100)
+  password      String    @db.VarChar(255)
+  full_name     String    @db.VarChar(100)
+  phone         String?   @db.VarChar(50)
+  address       String?   @db.Text
+  sim_number    String?   @db.VarChar(50)
+  sim_image     String?   @db.Text
+  avatar        String?   @db.Text
+  role          Role      @default(USER)
+  is_verified   Boolean   @default(false)
+  token         Int?
+  token_expired DateTime?
+  rentals       Rental[]
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
 
   @@index([email])
   @@map("users")
