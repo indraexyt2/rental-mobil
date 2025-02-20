@@ -4,6 +4,7 @@ import UserController from "../controllers/user.controller.js";
 const user = express.Router();
 const userController = new UserController();
 
-user.post('/api/auth/register', userController.registerNewUser);
+user.post('/register', userController.registerNewUser);
+user.post('/email-verification', userController.verifyUserEmail);
 
 export default user;
