@@ -11,12 +11,12 @@ redisClient.on('error', () => {
 
 const connectRedis = async () => {
     if (!redisClient.isOpen) {
-        await redisClient.connect()
-        logger.info("Berhasil terhubung dengan redis!")
+        await redisClient.connect();
+        logger.info("Berhasil terhubung dengan redis")
     }
 }
 
 export {
-    redisClient,
-    connectRedis
+    connectRedis,
+    redisClient
 }

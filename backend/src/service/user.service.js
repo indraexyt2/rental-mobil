@@ -23,18 +23,23 @@ class UserService {
     }
 
     verifyUserEmail = async (request) => {
-        const user = await this.userRepo.getUserByTokenVerify(parseInt(request.token));
+        const {token} = request;
+        if (token === "") {
+            throw new ResponseError(400, "Token tidak boleh kosong!")
+        }
+
+        const user = await this.userRepo.getUserByTokenVerify(parseInt(token));
         if (!user) {
             throw new ResponseError(400, "Token tidak valid!")
         }
 
         const userData = await this.userRepo.updateIsVerifiedUser(user.id)
-        const token = generateToken(userData, "token");
-        const refreshToken = generateToken(userData, "refreshToken");
+        const jwtToken = generateToken(userData, "token");
+        const jwtRefreshToken = generateToken(userData, "refreshToken");
 
         const userSession = {
-            token: token,
-            refreshToken: refreshToken
+            token: jwtToken,
+            refreshToken: jwtRefreshToken
         }
 
         await this.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession))
