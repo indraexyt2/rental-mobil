@@ -25,6 +25,7 @@ model User {
   avatar      String?  @db.Text
   role        Role     @default(USER)
   is_verified Boolean  @default(false)
+  token       Int?
   rentals     Rental[]
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
