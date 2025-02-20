@@ -147,3 +147,48 @@ describe('POST /api/auth/email-verification', () => {
         expect(response.body.errors).toEqual("Token tidak valid!");
     });
 });
+
+describe('POST /api/auth/login', () => {
+    beforeEach(() => {
+        removeTestUser();
+    });
+
+    it('should be able to login', async () => {
+        let response = await supertest(app)
+            .post('/api/auth/register')
+            .send({
+                "email": "test@example.com",
+                "password": "rahasia",
+                "full_name": "test"
+            });
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.email).toBe("test@example.com");
+        expect(response.body.data.full_name).toBe("test");
+        expect(response.body.data.password).toBeUndefined();
+
+        response = await supertest(app)
+            .post('/api/auth/login')
+            .send({
+                "email": "test@example.com",
+                "password": "rahasia"
+            });
+
+        const cookies = response.headers['set-cookie'];
+        expect(cookies.some(cookie => cookie.includes('token')));
+        expect(response.status).toBe(200);
+        expect(response.body.data.token).toBeDefined();
+    });
+
+    it('should reject if email and password null', async () => {
+        const response = await supertest(app)
+            .post('/api/auth/login')
+            .send({
+                "email": "",
+                "password": ""
+            });
+
+        expect(response.status).toBe(400);
+        expect(response.body.errors).toEqual("Semua kolom wajib diisi!");
+    });
+});

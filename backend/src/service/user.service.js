@@ -42,8 +42,37 @@ class UserService {
             refreshToken: jwtRefreshToken
         }
 
-        await this.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession))
+        await this.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
         return token;
+    }
+
+    login = async (request) => {
+        const {email, password} = request;
+        if (email === "" || password === "") {
+            throw new ResponseError(400, "Semua kolom wajib diisi!")
+        }
+
+        const user = await this.userRepo.getUserByEmail(email);
+        if (!user) {
+            throw new ResponseError(400, "Alamat email tidak ditemukan!")
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch === false) {
+            throw new ResponseError(400, "Kata sandi salah!")
+        }
+
+        const userData = await this.userRepo.getUserById(user.id)
+        const jwtToken = generateToken(userData, "token");
+        const jwtRefreshToken = generateToken(userData, "refreshToken");
+
+        const userSession = {
+            token: jwtToken,
+            refreshToken: jwtRefreshToken
+        }
+
+        await this.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
+        return jwtToken;
     }
 }
 
