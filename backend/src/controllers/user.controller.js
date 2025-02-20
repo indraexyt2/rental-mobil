@@ -33,7 +33,7 @@ class UserController {
                 "message": "Berhasil!"
             });
         } catch (e) {
-            logger.error("Gagal memverifikasi user:", err);
+            logger.error("Gagal memverifikasi user:", e);
             next(e);
         }
     }

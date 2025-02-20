@@ -40,7 +40,6 @@ class UserRepository {
                },
                select: {
                    id: true,
-                   is_verified: true
                }
            });
        } catch (err) {
