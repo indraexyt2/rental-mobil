@@ -3,10 +3,14 @@ import 'dotenv/config';
 
 import { logger } from "./utils/logger.js";
 import userRoute from "./routes/user.route.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
 
-const app = express();
-app.use(express.json())
-app.use(userRoute)
+export const app = express();
+app.use(express.json());
+
+app.use(userRoute);
+
+app.use(errorMiddleware);
 
 const PORT = process.env.APP_PORT;
 app.listen(PORT, () => {
