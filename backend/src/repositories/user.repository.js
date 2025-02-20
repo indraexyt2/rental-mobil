@@ -1,7 +1,5 @@
 import {prismaClient} from "../config/database.config.js";
-import {logger} from "../utils/logger.js";
 import {ResponseError} from "../error/response.error.js";
-import e from "express";
 
 class UserRepository {
     constructor(dbClient = prismaClient) {
@@ -67,6 +65,40 @@ class UserRepository {
             throw err;
         }
     };
+
+    async getUserByEmail(userEmail) {
+        try {
+            return await this.db.user.findUnique({
+                where: {
+                    email: userEmail
+                },
+                select: {
+                    id: true,
+                    password: true
+                }
+            })
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getUserById(userId) {
+        try {
+            return await this.db.user.findUnique({
+                where: {
+                    id: userId
+                },
+                select: {
+                    id: true,
+                    email: true,
+                    full_name: true,
+                    role: true
+                }
+            })
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 export default UserRepository;

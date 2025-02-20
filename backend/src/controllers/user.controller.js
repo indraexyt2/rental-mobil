@@ -38,6 +38,29 @@ class UserController {
         }
     }
 
+
+    login = async (req, res, next) => {
+        try {
+            const token = await this.userService.login(req.body);
+
+            res.cookie("token", token, {
+                httpOnly: true,
+                path: "/",
+                expires: new Date(Date.now() + 60 * 60 * 1000),
+                sameSite: true
+            });
+
+            return res.status(200).json({
+                "message": "Berhasil!",
+                "data": {
+                    "token": token
+                }
+            });
+        } catch (e) {
+            logger.error("Gagal memverifikasi user:", e);
+            next(e);
+        }
+    }
 }
 
 export default UserController;
