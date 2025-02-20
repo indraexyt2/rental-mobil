@@ -1,46 +1,20 @@
-import UserRepository from "../repositories/user.repository.js";
 import {logger} from "../utils/logger.js";
-import {userSchema} from "../utils/validator.js";
-import bcrypt from 'bcrypt';
+import UserService from "../service/user.service.js";
 
 class UserController {
     constructor() {
-        this.userRepo = new UserRepository();
+        this.userService = new UserService();
     }
-
-    registerNewUser = async (req, res) => {
+    registerNewUser = async (req, res, next) => {
         try {
-            const userData = req.body;
-            const {value, error} = userSchema.validate(userData, {abortEarly: false});
-            if (error) {
-                logger.error("Gagal mendaftarkan user: ", error);
-                return res.status(400).json({
-                    "message": "Pendaftaran tidak berhasil!",
-                    "data": error.details.map(err => err.message.replace(/"/g, ''))
-                });
-            }
-
-            value.password = await bcrypt.hash(value.password, 10);
-            value.token = Math.floor(100000 + Math.random() * 900000);
-            const newUser = await this.userRepo.addUser(value);
+           const result = await this.userService.registerNewUser(req.body);
             return res.status(200).json({
-                "message": "Pendaftan berhasil!",
-                "data": newUser
-            });
-        } catch (err) {
-            logger.error("Gagal mendaftarkan user:", err);
-
-            if (err.code === "P2002") {
-                return res.status(500).json({
-                    "message": "Pendaftaran tidak berhasil!",
-                    "data": "Alamat email sudah digunakan!",
-                });
-            };
-
-            return res.status(500).json({
-                "message": "Pendaftaran tidak berhasil!",
-                "data": "Terjadi kesalahan pada server"
-            });
+               "message": "Pendaftaran berhasil!",
+               "data": result
+           });
+        } catch (e) {
+            logger.error("Gagal mendaftarkan user:", e);
+            next(e);
         }
     }
 

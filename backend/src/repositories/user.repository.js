@@ -1,12 +1,11 @@
 import {prismaClient} from "../config/database.config.js";
 import {logger} from "../utils/logger.js";
-
-
+import {ResponseError} from "../error/response.error.js";
 
 class UserRepository {
     constructor(dbClient = prismaClient) {
         this.db = dbClient;
-    }
+    };
 
     async addUser(userData) {
         try {
@@ -25,10 +24,12 @@ class UserRepository {
                 }
             });
         } catch (err) {
-            logger.error("failed to insert new user: ", err);
+            if (err.code === "P2002") {
+                throw new ResponseError(400, "Alamat email sudah digunakan!");
+            }
             throw err;
         }
-    }
+    };
 }
 
 export default UserRepository;
