@@ -12,6 +12,6 @@ user.post('/login', userController.login);
 user.get('/refresh-token', refreshTokenMiddleware, userController.refreshToken);
 user.delete('/logout', authUserMiddleware, userController.logout);
 user.get('/:id', authUserMiddleware, userController.getUser);
-user.get('/', authAdminMiddleware, userController.getUsers);
+user.get('', authAdminMiddleware, userController.getUsers);
 
 export default user;

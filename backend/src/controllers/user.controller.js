@@ -20,9 +20,9 @@ class UserController {
 
     verifyUserEmail = async (req, res, next) => {
         try {
-            const token = await this.userService.verifyUserEmail(req.body);
+            const result = await this.userService.verifyUserEmail(req.body);
 
-            res.cookie("token", token, {
+            res.cookie("token", result.token, {
                 httpOnly: true,
                 path: "/",
                 expires: new Date(Date.now() + 60 * 60 * 1000),
@@ -30,7 +30,8 @@ class UserController {
             });
 
             return res.status(200).json({
-                "message": "Berhasil!"
+                "message": "Berhasil!",
+                "data": result
             });
         } catch (e) {
             logger.error("Gagal memverifikasi user:", e);
@@ -41,9 +42,9 @@ class UserController {
 
     login = async (req, res, next) => {
         try {
-            const token = await this.userService.login(req.body);
+            const result = await this.userService.login(req.body);
 
-            res.cookie("token", token, {
+            res.cookie("token", result.token, {
                 httpOnly: true,
                 path: "/",
                 expires: new Date(Date.now() + 60 * 60 * 1000),
@@ -52,9 +53,7 @@ class UserController {
 
             return res.status(200).json({
                 "message": "Berhasil!",
-                "data": {
-                    "token": token
-                }
+                "data": result
             });
         } catch (e) {
             logger.error("Gagal memverifikasi user:", e);
