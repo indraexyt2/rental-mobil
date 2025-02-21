@@ -90,7 +90,7 @@ describe('POST /api/auth/email-verification', () => {
         const response = await supertest(app)
             .post('/api/auth/email-verification')
             .send({
-               "token": result.body.token
+               "token": result.body.data.token
             });
 
         const cookies = response.headers['set-cookie'];

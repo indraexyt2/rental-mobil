@@ -96,6 +96,32 @@ class UserController {
             next(e);
         }
     }
+
+    getUser = async (req, res, next) => {
+        try {
+            const result = await this.userService.getUser(req);
+            return res.status(200).json({
+                "message": "Berhasil!",
+                "data": result
+            });
+        } catch (e) {
+            logger.error("Gagal mendapatkan user info:", e);
+            next(e);
+        }
+    }
+
+    getUsers = async (req, res, next) => {
+        try {
+            const result = await this.userService.getUsers(req);
+            return res.status(200).json({
+                "message": "Berhasil!",
+                "data": result
+            });
+        } catch (e) {
+            logger.error("Gagal mendapatkan user info:", e);
+            next(e);
+        }
+    }
 }
 
 export default UserController;

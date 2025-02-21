@@ -1,9 +1,12 @@
 import {prismaClient} from "../config/database.config.js";
 import {ResponseError} from "../error/response.error.js";
+import {redisClient} from "../config/redis.config.js";
+import {logger} from "../utils/logger.js";
 
 class UserRepository {
     constructor(dbClient = prismaClient) {
         this.db = dbClient;
+        this.rdb = redisClient;
     };
 
     async addUser(userData) {
@@ -19,7 +22,8 @@ class UserRepository {
                     address: true,
                     avatar: true,
                     role: true,
-                    token: true
+                    token: true,
+                    token_expired: true
                 }
             });
         } catch (err) {
@@ -86,14 +90,51 @@ class UserRepository {
 
     async getUserById(userId) {
         try {
-            return await this.db.user.findUnique({
+            let user = await this.rdb.get(`user:info:${userId}`);
+            if (user) {
+                logger.info("Berhasil mendapatkan data user dari redis!")
+                user = JSON.parse(user);
+                return user;
+            }
+
+            user = await this.db.user.findUnique({
                 where: {
-                    id: userId
+                    id: parseInt(userId)
                 },
                 select: {
                     id: true,
                     email: true,
                     full_name: true,
+                    address: true,
+                    phone: true,
+                    avatar: true,
+                    role: true,
+                    rentals: true
+                },
+            })
+
+            const ok = await this.rdb.set(`user:info:${userId}`, JSON.stringify(user), {EX: 60 * 60 * 24});
+            if (ok !== "OK") {
+                logger.warn("Gagal menyimpan data user ke redis!")
+            }
+            logger.info("Berhasil menyimpan data user ke redis!")
+
+            return user;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getUsers() {
+        try {
+            return await this.db.user.findMany({
+                select: {
+                    id: true,
+                    email: true,
+                    full_name: true,
+                    address: true,
+                    phone: true,
+                    avatar: true,
                     role: true
                 }
             })

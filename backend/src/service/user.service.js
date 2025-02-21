@@ -5,7 +5,6 @@ import UserRepository from "../repositories/user.repository.js";
 import {generateToken} from "../utils/jwt.js";
 import {redisClient} from "../config/redis.config.js";
 import {sendEmailVerification, sendWelcomeEmail} from "../mail/email.js";
-import {json, request} from "express";
 
 class UserService {
     constructor() {
@@ -24,7 +23,7 @@ class UserService {
         value.token_expired = new Date(Date.now() + 60 * 10 * 1000);
         const user = await this.userRepo.addUser(value);
 
-        await sendEmailVerification(value.email, value.token);
+        // await sendEmailVerification(value.email, value.token);
         return user;
     }
 
@@ -39,6 +38,7 @@ class UserService {
             throw new ResponseError(400, "Token tidak valid!")
         }
 
+        console.log(user)
         if (user.token_expired.getTime() < Date.now()) {
             throw new ResponseError(400, "Token kadaluarsa!")
         }
@@ -54,7 +54,7 @@ class UserService {
 
         await this.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
 
-        await sendWelcomeEmail(userData.email, userData.full_name);
+        // await sendWelcomeEmail(userData.email, userData.full_name);
         return token;
     }
 
@@ -101,6 +101,19 @@ class UserService {
     logout = async (request) => {
         const claimsToken = request.claimsToken;
         await this.rdb.del(`user:session:${claimsToken.id}`);
+    }
+
+    getUser = async (request) => {
+        const userId = request.params.id;
+        if (!userId) {
+            throw new ResponseError(400, "User id dibutuhkan");
+        }
+
+        return await this.userRepo.getUserById(userId);
+    }
+
+    getUsers = async () => {
+        return await this.userRepo.getUsers();
     }
 }
 
