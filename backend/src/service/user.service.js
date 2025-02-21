@@ -5,6 +5,7 @@ import UserRepository from "../repositories/user.repository.js";
 import {generateToken} from "../utils/jwt.js";
 import {redisClient} from "../config/redis.config.js";
 import {sendEmailVerification, sendWelcomeEmail} from "../mail/email.js";
+import {json} from "express";
 
 class UserService {
     constructor() {
@@ -84,6 +85,17 @@ class UserService {
 
         await this.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
         return jwtToken;
+    }
+
+    refreshToken = async (request) => {
+        const claimsToken = request.claimsToken;
+        const userSessionJson = await this.rdb.get(`user:session:${claimsToken.id}`);
+        if (!userSessionJson) {
+            throw new ResponseError(401, "Unauthorized")
+        }
+
+        const userData = await this.userRepo.getUserById(claimsToken.id)
+        return generateToken(userData, "token");
     }
 }
 

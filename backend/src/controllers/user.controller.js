@@ -61,6 +61,28 @@ class UserController {
             next(e);
         }
     }
+
+    refreshToken = async (req, res, next) => {
+       try {
+           const token = await this.userService.refreshToken(req);
+           res.cookie("token", token, {
+               httpOnly: true,
+               path: "/",
+               expires: new Date(Date.now() + 60 * 60 * 1000),
+               sameSite: true
+           });
+
+           return res.status(200).json({
+               "message": "Berhasil!",
+               "data": {
+                   "token": token
+               }
+           });
+       } catch (e) {
+           logger.error("Refresh token gagal:", e)
+           next(e);
+       }
+    }
 }
 
 export default UserController;

@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 import {logger} from "./logger.js";
+import {ResponseError} from "../error/response.error.js";
 
 const JwtMappingType = {
     token: { expiresIn: '1h'},
@@ -18,6 +19,6 @@ export const validateToken = async (token) => {
         return jwt.verify(token, secretKey)
     } catch (err) {
         logger.error("Validasi token gagal:", err)
-        throw new Error("Token tidak valid atau telah kadaluarsa!");
+        throw new ResponseError(401, "Unauthorized")
     }
 }
