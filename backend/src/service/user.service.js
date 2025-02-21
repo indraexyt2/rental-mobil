@@ -109,7 +109,7 @@ class UserService {
     }
 
     getUser = async (request) => {
-        const userId = request.params.id;
+        const userId = request.claimsToken.id;
         if (!userId) {
             throw new ResponseError(400, "User id dibutuhkan");
         }

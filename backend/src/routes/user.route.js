@@ -12,7 +12,7 @@ user.post('/email-verification', userController.verifyUserEmail);
 user.post('/login', userController.login);
 user.get('/refresh-token', refreshTokenMiddleware, userController.refreshToken);
 user.delete('/logout', authUserMiddleware, userController.logout);
-user.get('/:id', authUserMiddleware, userController.getUser);
+user.get('/me', authUserMiddleware, userController.getUser);
 user.get('', authAdminMiddleware, userController.getUsers);
 user.put('/update', authUserMiddleware, upload, userController.updateUser);
 
