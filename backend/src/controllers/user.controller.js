@@ -83,6 +83,19 @@ class UserController {
            next(e);
        }
     }
+
+    logout = async (req, res, next) => {
+        try {
+            await this.userService.logout(req);
+            res.clearCookie("token");
+            return res.status(200).json({
+                "message": "Logout berhasil!"
+            })
+        } catch (e) {
+            logger.error("Gagal logout:", err);
+            next(e);
+        }
+    }
 }
 
 export default UserController;

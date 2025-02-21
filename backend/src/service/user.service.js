@@ -5,7 +5,7 @@ import UserRepository from "../repositories/user.repository.js";
 import {generateToken} from "../utils/jwt.js";
 import {redisClient} from "../config/redis.config.js";
 import {sendEmailVerification, sendWelcomeEmail} from "../mail/email.js";
-import {json} from "express";
+import {json, request} from "express";
 
 class UserService {
     constructor() {
@@ -91,11 +91,16 @@ class UserService {
         const claimsToken = request.claimsToken;
         const userSessionJson = await this.rdb.get(`user:session:${claimsToken.id}`);
         if (!userSessionJson) {
-            throw new ResponseError(401, "Unauthorized")
+            throw new ResponseError(401, "Unauthorized");
         }
 
         const userData = await this.userRepo.getUserById(claimsToken.id)
         return generateToken(userData, "token");
+    }
+
+    logout = async (request) => {
+        const claimsToken = request.claimsToken;
+        await this.rdb.del(`user:session:${claimsToken.id}`);
     }
 }
 
