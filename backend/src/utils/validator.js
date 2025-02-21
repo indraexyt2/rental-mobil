@@ -12,3 +12,11 @@ export const userSchema = Joi.object({
     role: Joi.string().valid("USER", "ADMIN").default("USER"),
     is_verified: Joi.boolean().default(false),
 });
+
+export const userUpdateSchema = Joi.object({
+    email: Joi.string().email().max(100).required(),
+    full_name: Joi.string().max(100).required(),
+    phone: Joi.string().max(50).required(),
+    address: Joi.string().required(),
+    sim_number: Joi.string().max(50).required(),
+});

@@ -20,9 +20,9 @@ class UserController {
 
     verifyUserEmail = async (req, res, next) => {
         try {
-            const token = await this.userService.verifyUserEmail(req.body);
+            const result = await this.userService.verifyUserEmail(req.body);
 
-            res.cookie("token", token, {
+            res.cookie("token", result.token, {
                 httpOnly: true,
                 path: "/",
                 expires: new Date(Date.now() + 60 * 60 * 1000),
@@ -30,7 +30,8 @@ class UserController {
             });
 
             return res.status(200).json({
-                "message": "Berhasil!"
+                "message": "Berhasil!",
+                "data": result
             });
         } catch (e) {
             logger.error("Gagal memverifikasi user:", e);
@@ -41,9 +42,9 @@ class UserController {
 
     login = async (req, res, next) => {
         try {
-            const token = await this.userService.login(req.body);
+            const result = await this.userService.login(req.body);
 
-            res.cookie("token", token, {
+            res.cookie("token", result.token, {
                 httpOnly: true,
                 path: "/",
                 expires: new Date(Date.now() + 60 * 60 * 1000),
@@ -52,12 +53,83 @@ class UserController {
 
             return res.status(200).json({
                 "message": "Berhasil!",
-                "data": {
-                    "token": token
-                }
+                "data": result
             });
         } catch (e) {
             logger.error("Gagal memverifikasi user:", e);
+            next(e);
+        }
+    }
+
+    refreshToken = async (req, res, next) => {
+       try {
+           const token = await this.userService.refreshToken(req);
+           res.cookie("token", token, {
+               httpOnly: true,
+               path: "/",
+               expires: new Date(Date.now() + 60 * 60 * 1000),
+               sameSite: true
+           });
+
+           return res.status(200).json({
+               "message": "Berhasil!",
+               "data": {
+                   "token": token
+               }
+           });
+       } catch (e) {
+           logger.error("Refresh token gagal:", e)
+           next(e);
+       }
+    }
+
+    logout = async (req, res, next) => {
+        try {
+            await this.userService.logout(req);
+            res.clearCookie("token");
+            return res.status(200).json({
+                "message": "Logout berhasil!"
+            })
+        } catch (e) {
+            logger.error("Gagal logout:", err);
+            next(e);
+        }
+    }
+
+    getUser = async (req, res, next) => {
+        try {
+            const result = await this.userService.getUser(req);
+            return res.status(200).json({
+                "message": "Berhasil!",
+                "data": result
+            });
+        } catch (e) {
+            logger.error("Gagal mendapatkan user info:", e);
+            next(e);
+        }
+    }
+
+    getUsers = async (req, res, next) => {
+        try {
+            const result = await this.userService.getUsers(req);
+            return res.status(200).json({
+                "message": "Berhasil!",
+                "data": result
+            });
+        } catch (e) {
+            logger.error("Gagal mendapatkan user info:", e);
+            next(e);
+        }
+    }
+
+    updateUser = async (req, res, next) => {
+        try {
+            const result = await this.userService.updateUser(req);
+            return res.status(200).json({
+                "message": "Berhasil!"
+            });
+        } catch (e) {
+            logger.error("Gagal update data user:", e)
             next(e);
         }
     }
