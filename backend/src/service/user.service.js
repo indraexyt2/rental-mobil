@@ -38,8 +38,7 @@ class UserService {
             throw new ResponseError(400, "Token tidak valid!")
         }
 
-        const tenMinute = Date.now() + 60 * 10 * 1000;
-        if (user.token_expired.getTime() < tenMinute) {
+        if (user.token_expired.getTime() < Date.now()) {
             throw new ResponseError(400, "Token kadaluarsa!")
         }
 
