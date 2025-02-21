@@ -5,6 +5,8 @@ import {removeTestUser} from "./test.utils";
 import {redisClient} from "../src/config/redis.config.js";
 import jwt from "jsonwebtoken";
 import {response} from "express";
+import fs from "fs/promises";
+import path from "path";
 
 describe('POST /api/users/register', () => {
 
@@ -553,3 +555,151 @@ describe('GET /api/users', () => {
     });
 });
 
+describe('PUT /api/users/update', () => {
+    let userCookies;
+    let testImagePath;
+
+    beforeAll(async () => {
+        await removeTestUser();
+        const uploadsDir = 'uploads/test';
+        await fs.mkdir(uploadsDir, { recursive: true });
+        testImagePath = path.join(uploadsDir, 'test.jpg');
+        const imageBuffer = Buffer.from('fake image data');
+        await fs.writeFile(testImagePath, imageBuffer);
+    });
+
+    beforeEach(async () => {
+        let response = await supertest(app)
+            .post('/api/users/register')
+            .send({
+                "email": "test@test.com",
+                "password": "rahasia",
+                "full_name": "test"
+            });
+
+        expect(response.status).toBe(200);
+        const verificationToken = response.body.data.token;
+
+        response = await supertest(app)
+            .post('/api/users/email-verification')
+            .send({
+                "token": verificationToken
+            });
+
+        expect(response.status).toBe(200);
+
+        response = await supertest(app)
+            .post('/api/users/login')
+            .send({
+                "email": "test@test.com",
+                "password": "rahasia"
+            });
+
+        expect(response.status).toBe(200);
+        userCookies = response.headers['set-cookie'];
+    });
+
+    afterEach(async () => {
+        await removeTestUser();
+    });
+
+    afterAll(async () => {
+        await removeTestUser();
+        await fs.rm('uploads', { recursive: true, force: true });
+    });
+
+    it('should successfully update user data with avatar', async () => {
+        const result = await supertest(app)
+            .put('/api/users/update')
+            .set('Cookie', userCookies)
+            .field('email', 'test@test.com')
+            .field('full_name', 'Updated Name')
+            .field('phone', '081234567890')
+            .field('address', 'Updated Address')
+            .field('sim_number', '123455678')
+            .attach('avatar', testImagePath);
+
+        expect(result.status).toBe(200);
+        expect(result.body.message).toBe("Berhasil!");
+
+        const userResponse = await supertest(app)
+            .get('/api/users/me')
+            .set('Cookie', userCookies);
+
+        expect(userResponse.status).toBe(200);
+        expect(userResponse.body.data.full_name).toBe('Updated Name');
+        expect(userResponse.body.data.phone).toBe('081234567890');
+        expect(userResponse.body.data.address).toBe('Updated Address');
+        expect(userResponse.body.data.avatar).toBeDefined();
+    });
+
+    it('should successfully update user data with sim image', async () => {
+        const result = await supertest(app)
+            .put('/api/users/update')
+            .set('Cookie', userCookies)
+            .set('Cookie', userCookies)
+            .field('email', 'test@test.com')
+            .field('full_name', 'Updated Name')
+            .field('phone', '081234567890')
+            .field('address', 'Updated Address')
+            .field('sim_number', '123455678')
+            .attach('sim_image', testImagePath);
+
+        expect(result.status).toBe(200);
+        expect(result.body.message).toBe("Berhasil!");
+    });
+
+    it('should successfully update user data without files', async () => {
+        const result = await supertest(app)
+            .put('/api/users/update')
+            .set('Cookie', userCookies)
+            .field('email', 'test@test.com')
+            .field('full_name', 'Updated Name')
+            .field('phone', '081234567890')
+            .field('address', 'Updated Address')
+            .field('sim_number', '123455678')
+
+        expect(result.status).toBe(200);
+        expect(result.body.message).toBe("Berhasil!");
+    });
+
+    it('should reject if no token provided', async () => {
+        const result = await supertest(app)
+            .put('/api/users/update')
+            .field('full_name', 'Updated Name');
+
+        expect(result.status).toBe(401);
+        expect(result.body.errors).toBe("Unauthorized");
+    });
+
+    it('should reject if token is invalid', async () => {
+        const result = await supertest(app)
+            .put('/api/users/update')
+            .set('Cookie', ['token=invalid.token.here'])
+            .field('full_name', 'Updated Name');
+
+        expect(result.status).toBe(401);
+        expect(result.body.errors).toBe("Unauthorized");
+    });
+
+    it('should reject if file size exceeds limit', async () => {
+        const largeFilePath = path.join('uploads/test', 'large.jpg');
+        const largeBuffer = Buffer.alloc(6 * 1024 * 1024);
+        await fs.writeFile(largeFilePath, largeBuffer);
+
+        const result = await supertest(app)
+            .put('/api/users/update')
+            .set('Cookie', userCookies)
+            .field('email', 'test@test.com')
+            .field('full_name', 'Updated Name')
+            .field('phone', '081234567890')
+            .field('address', 'Updated Address')
+            .field('sim_number', '123455678')
+            .attach('avatar', largeFilePath);
+
+        expect(result.status).toBe(400);
+        expect(result.body.errors).toBeDefined();
+
+        await fs.unlink(largeFilePath);
+    });
+});
