@@ -127,7 +127,14 @@ class UserRepository {
 
     async getUsers() {
         try {
-            return await this.db.user.findMany({
+            let users = await this.rdb.get("users");
+            if (users) {
+                logger.info("Berhasil mendapatkan semua data dari redis!")
+                users = JSON.parse(users);
+                return users;
+            }
+
+            users = await this.db.user.findMany({
                 select: {
                     id: true,
                     email: true,
@@ -137,7 +144,15 @@ class UserRepository {
                     avatar: true,
                     role: true
                 }
-            })
+            });
+
+            const ok = await this.rdb.set(`users`, JSON.stringify(users), {EX: 60 * 60 * 24});
+            if (ok !== "OK") {
+                logger.warn("Gagal menyimpan data user ke redis!")
+            }
+            logger.info("Berhasil menyimpan data user ke redis!")
+
+            return users;
         } catch (err) {
             throw err;
         }

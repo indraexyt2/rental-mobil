@@ -52,7 +52,7 @@ class UserService {
             refreshToken: jwtRefreshToken
         }
 
-        await this.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
+        await this.userRepo.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
 
         // await sendWelcomeEmail(userData.email, userData.full_name);
         return token;
@@ -83,7 +83,7 @@ class UserService {
             refreshToken: jwtRefreshToken
         }
 
-        await this.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
+        await this.userRepo.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
         return jwtToken;
     }
 
@@ -100,7 +100,7 @@ class UserService {
 
     logout = async (request) => {
         const claimsToken = request.claimsToken;
-        await this.rdb.del(`user:session:${claimsToken.id}`);
+        await this.userRepo.rdb.del(`user:session:${claimsToken.id}`);
     }
 
     getUser = async (request) => {

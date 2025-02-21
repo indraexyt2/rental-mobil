@@ -27,8 +27,6 @@ export const authAdminMiddleware = async (req, res, next) => {
             return next(new ResponseError(401, "Unauthorized"));
         }
 
-        console.log(claimsToken)
-
         req.claimsToken = claimsToken;
         next();
     } catch (err) {
