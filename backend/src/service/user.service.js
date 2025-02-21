@@ -19,6 +19,7 @@ class UserService {
 
         value.password = await bcrypt.hash(value.password, 10);
         value.token = Math.floor(100000 + Math.random() * 900000);
+        value.token_expired = new Date(Date.now() + 60 * 10 * 1000);
         return await this.userRepo.addUser(value);
     }
 
@@ -31,6 +32,11 @@ class UserService {
         const user = await this.userRepo.getUserByTokenVerify(parseInt(token));
         if (!user) {
             throw new ResponseError(400, "Token tidak valid!")
+        }
+
+        const tenMinute = Date.now() + 60 * 10 * 1000;
+        if (user.token_expired.getTime() < tenMinute) {
+            throw new ResponseError(400, "Token kadaluarsa!")
         }
 
         const userData = await this.userRepo.updateIsVerifiedUser(user.id)

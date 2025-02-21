@@ -38,6 +38,7 @@ class UserRepository {
                },
                select: {
                    id: true,
+                   token_expired: true,
                }
            });
        } catch (err) {
@@ -53,7 +54,8 @@ class UserRepository {
                 },
                 data: {
                     is_verified: true,
-                    token: null
+                    token: null,
+                    token_expired: null
                 },
                 select: {
                     id: true,
