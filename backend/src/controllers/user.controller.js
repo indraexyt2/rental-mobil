@@ -121,6 +121,18 @@ class UserController {
             next(e);
         }
     }
+
+    updateUser = async (req, res, next) => {
+        try {
+            const result = await this.userService.updateUser(req);
+            return res.status(200).json({
+                "message": "Berhasil!"
+            });
+        } catch (e) {
+            logger.error("Gagal update data user:", e)
+            next(e);
+        }
+    }
 }
 
 export default UserController;

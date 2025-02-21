@@ -109,6 +109,8 @@ class UserRepository {
                     phone: true,
                     avatar: true,
                     role: true,
+                    sim_number: true,
+                    sim_image: true,
                     rentals: true
                 },
             })
@@ -142,7 +144,9 @@ class UserRepository {
                     address: true,
                     phone: true,
                     avatar: true,
-                    role: true
+                    role: true,
+                    sim_number: true,
+                    sim_image: true
                 }
             });
 
@@ -153,6 +157,30 @@ class UserRepository {
             logger.info("Berhasil menyimpan data user ke redis!")
 
             return users;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async updateUser(userData) {
+        try {
+            const user = await this.db.user.update({
+                where: {
+                    id: userData.id
+                },
+                data: {
+                    avatar: userData.avatar,
+                    full_name: userData.full_name,
+                    phone: userData.phone,
+                    address: userData.address,
+                    sim_number: userData.sim_number,
+                    sim_image: userData.sim_image
+                }
+            });
+
+            await this.rdb.del(`user:info:${userData.id}`);
+            await this.rdb.del(`users`);
+            return user;
         } catch (err) {
             throw err;
         }

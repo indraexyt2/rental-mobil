@@ -1,4 +1,4 @@
-import {userSchema} from "../utils/validator.js";
+import {userSchema, userUpdateSchema} from "../utils/validator.js";
 import {ResponseError} from "../error/response.error.js";
 import bcrypt from "bcrypt";
 import UserRepository from "../repositories/user.repository.js";
@@ -119,6 +119,29 @@ class UserService {
 
     getUsers = async () => {
         return await this.userRepo.getUsers();
+    }
+
+    updateUser = async (request) => {
+        const userData = request.body;
+        const {value, error} = userUpdateSchema.validate(userData, {abortEarly: false});
+        if (error) {
+            throw new ResponseError(400, error.details.map(err => err.message.replace(/"/g, '')));
+        }
+
+        const claimsToken = request.claimsToken;
+        value.id = claimsToken.id;
+
+        const files = request.files;
+        if (files.avatar) {
+            value.avatar = files.avatar[0].path;
+        }
+
+        if (files.sim_image) {
+            value.sim_image = files.sim_image[0].path;
+        }
+
+        console.log(value);
+        return await this.userRepo.updateUser(value);
     }
 }
 
