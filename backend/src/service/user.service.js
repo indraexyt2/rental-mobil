@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import UserRepository from "../repositories/user.repository.js";
 import {generateToken} from "../utils/jwt.js";
 import {redisClient} from "../config/redis.config.js";
+import {sendEmailVerification, sendWelcomeEmail} from "../mail/email.js";
 
 class UserService {
     constructor() {
@@ -19,7 +20,11 @@ class UserService {
 
         value.password = await bcrypt.hash(value.password, 10);
         value.token = Math.floor(100000 + Math.random() * 900000);
-        return await this.userRepo.addUser(value);
+        value.token_expired = new Date(Date.now() + 60 * 10 * 1000);
+        const user = await this.userRepo.addUser(value);
+
+        await sendEmailVerification(value.email, value.token);
+        return user;
     }
 
     verifyUserEmail = async (request) => {
@@ -33,6 +38,11 @@ class UserService {
             throw new ResponseError(400, "Token tidak valid!")
         }
 
+        const tenMinute = Date.now() + 60 * 10 * 1000;
+        if (user.token_expired.getTime() < tenMinute) {
+            throw new ResponseError(400, "Token kadaluarsa!")
+        }
+
         const userData = await this.userRepo.updateIsVerifiedUser(user.id)
         const jwtToken = generateToken(userData, "token");
         const jwtRefreshToken = generateToken(userData, "refreshToken");
@@ -43,6 +53,8 @@ class UserService {
         }
 
         await this.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
+
+        await sendWelcomeEmail(userData.email, userData.full_name);
         return token;
     }
 
