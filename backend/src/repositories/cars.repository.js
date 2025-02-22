@@ -53,7 +53,8 @@ class CarsRepository {
                     },
                     include: {
                         images: true,
-                        category: true
+                        category: true,
+                        features: true
                     }
                 });
             });
@@ -99,7 +100,8 @@ class CarsRepository {
                    },
                   include: {
                        images: true,
-                      category: true
+                      category: true,
+                      features: true
                   }
                });
 
@@ -124,6 +126,41 @@ class CarsRepository {
             return result;
         } catch (err) {
             throw err;
+        }
+    }
+
+    async getCar(carId) {
+        try {
+            const carRdb = await this.rdb.get(`car:${carId}`) ;
+            if (carRdb) {
+                logger.info("Berhasil mendapatkan data mobil dari redis!")
+                return JSON.parse(carRdb)
+            }
+
+            const car = await this.db.car.findUnique({
+                where: {
+                    id: carId,
+                },
+                include: {
+                    images: true,
+                    category: true,
+                    features: true
+                }
+            });
+
+            const ok = await this.rdb.set(`car:${car.id}`, JSON.stringify(car), {EX: 60 * 60 * 24});
+            switch (ok) {
+                case ('OK'):
+                    logger.info("Berhasil menyimpan data mobil ke redis!");
+                    break;
+                default:
+                    logger.warn("Gagal menyimpan data mobil ke redis!");
+                    break;
+            }
+
+            return car;
+        } catch (err) {
+            return err;
         }
     }
 }

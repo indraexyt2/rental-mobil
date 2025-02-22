@@ -8,5 +8,6 @@ const carController = new CarController();
 
 car.post('', authAdminMiddleware, upload, carController.addNewCar);
 car.get('', carController.getCars);
+car.get('/:id', carController.getCar);
 
 export default car;

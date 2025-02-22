@@ -2,6 +2,7 @@ import CarsRepository from "../repositories/cars.repository.js";
 import {carSchema} from "../utils/validator.js";
 import {ResponseError} from "../error/response.error.js";
 import fs from "fs/promises";
+import car from "../routes/car.route.js";
 
 class CarService {
     constructor() {
@@ -60,6 +61,15 @@ class CarService {
             totalData,
             totalPage
         }
+    }
+
+    async getCar(request) {
+        const carId = request.params.id;
+        if (!carId) {
+            throw new ResponseError(400, "Mobil ID dibutuhkan!");
+        }
+
+        return await this.carRepo.getCar(parseInt(carId))
     }
 }
 
