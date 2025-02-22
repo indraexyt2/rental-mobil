@@ -4,7 +4,6 @@ import {app} from '../src/app'
 import {removeTestUser} from "./test.utils";
 import {redisClient} from "../src/config/redis.config.js";
 import jwt from "jsonwebtoken";
-import {response} from "express";
 import fs from "fs/promises";
 import path from "path";
 
