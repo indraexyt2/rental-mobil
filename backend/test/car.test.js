@@ -171,4 +171,104 @@ describe("POST /api/cars", () => {
         expect(response.body.errors).toContain('Category harus diisi!');
     });
 
-})
+});
+
+describe('GET /api/cars', () => {
+    let imageTest;
+
+    const userData = {
+        brand: 'Toyota',
+        model: 'Camry',
+        year: 2022,
+        transmission: 'Automatic',
+        capacity: 5,
+        fuel_type: 'Bensin',
+        price_per_day: 500000,
+        description: 'Lorem ipsum dolor sit amet',
+        mileage: 10000,
+        features: JSON.stringify(['AC', 'GPS']),
+        category: JSON.stringify(['Sedan']),
+    };
+
+    beforeAll(async () => {
+        const uploadDir = 'uploads/test';
+        await fs.mkdir(uploadDir, {recursive: true});
+        imageTest = path.join(uploadDir, 'test.png');
+        const imageBuffer = Buffer.from("Buffer test");
+        await fs.writeFile(imageTest, imageBuffer)
+    })
+
+    beforeEach(async () => {
+        let response = await supertest(app)
+            .post('/api/users/register')
+            .send({
+                "email": "test@admin.com",
+                "password": "test123test",
+                "full_name": "Admin",
+                "role": "ADMIN"
+            });
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.email).toEqual("test@admin.com");
+
+        response = await supertest(app)
+            .post('/api/users/email-verification')
+            .send({
+                "token": response.body.data.token
+            });
+
+        expect(response.status).toBe(200);
+
+        for (let i = 0; i < 5; i++) {
+            const addCarResponse = await supertest(app)
+                .post('/api/cars')
+                .set('Cookie', response.header['set-cookie'])
+                .field(userData)
+                .attach('car', imageTest)
+
+            expect(addCarResponse.status).toBe(200);
+        }
+    });
+
+    afterEach(async () => {
+        await removeTestUser();
+        await removeTestCarImage();
+        await removeTestCarFeatures();
+        await removeTestCategory();
+        await removeTestCars();
+    });
+
+    afterAll(async () => {
+        await fs.rm('uploads/test', { recursive: true });
+    });
+
+    it('should can get cars data', async () => {
+        const response = await supertest(app)
+            .get('/api/cars')
+
+        expect(response.status).toBe(200);
+        expect(Array.isArray(response.body.data.cars)).toBe(true);
+        expect(response.body.data.cars.length).toBeGreaterThan(3);
+        expect(response.body.data.cars[0].brand).toBe("Toyota");
+    });
+
+    it('should can get filtered cars data with parameters', async () => {
+        const response = await supertest(app)
+            .get('/api/cars')
+            .query({
+                brand: 'Honda',
+                page: 1,
+                limit: 10,
+                fuel_type: 'Bensin',
+                transmission: 'Automatic'
+            });
+
+        expect(response.status).toBe(200);
+        expect(Array.isArray(response.body.data.cars)).toBe(true);
+        expect(response.body.data.cars).toHaveLength(0);
+        expect(response.body.data.pagination).toBeDefined();
+        expect(response.body.data.pagination.page).toBe(1);
+        expect(response.body.data.pagination.limit).toBe(10);
+        expect(response.body.data.pagination.total_page).toBe(0);
+    });
+});
