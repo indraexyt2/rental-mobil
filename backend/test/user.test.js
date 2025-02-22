@@ -355,7 +355,7 @@ describe('DELETE /api/users/logout', () => {
     });
 });
 
-describe('GET /api/users/:id', () => {
+describe('GET /api/users/me', () => {
     let loginCookies;
 
     beforeEach(async () => {

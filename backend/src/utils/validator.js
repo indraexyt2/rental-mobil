@@ -31,6 +31,8 @@ export const userSchema = Joi.object({
             'string.max': 'Nama lengkap maksimal 100 karakter!',
             'any.required': 'Nama lengkap harus diisi!'
         }),
+
+    role: Joi.string().allow(null)
 });
 
 export const userUpdateSchema = Joi.object({
