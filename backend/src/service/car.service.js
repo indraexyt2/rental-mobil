@@ -31,6 +31,36 @@ class CarService {
 
         return await this.carRepo.addNewCar(value)
     }
+
+    async getCars(request) {
+        const {
+            brand,
+            transmission,
+            fuel_type,
+            page = 1,
+            limit = 10
+        } = request.query;
+
+        const filterData = {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            skip: (parseInt(page) - 1) * parseInt(limit),
+            where: {
+                ...(brand && {brand}),
+                ...(transmission && {transmission}),
+                ...(fuel_type && {fuel_type})
+            }
+        }
+
+        const {cars, totalData} = await this.carRepo.getCars(filterData);
+        const totalPage = Math.ceil(totalData / filterData.limit)
+
+        return {
+            cars,
+            totalData,
+            totalPage
+        }
+    }
 }
 
 export default CarService;

@@ -7,5 +7,6 @@ const car = express.Router();
 const carController = new CarController();
 
 car.post('', authAdminMiddleware, upload, carController.addNewCar);
+car.get('', carController.getCars);
 
 export default car;
