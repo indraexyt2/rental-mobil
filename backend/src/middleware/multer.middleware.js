@@ -37,7 +37,8 @@ const upload = multer({
     fileFilter
 }).fields([
     { name: 'sim_image', maxCount: 1 },
-    { name: 'avatar', maxCount: 1 }
+    { name: 'avatar', maxCount: 1 },
+    { name: 'car', maxCount: 5}
 ]);
 
 export default upload;

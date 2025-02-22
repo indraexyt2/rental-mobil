@@ -52,10 +52,9 @@ model Car {
   is_active     Boolean    @default(true)
   description   String     @db.Text
   mileage       Int
-  features      String[]
+  features      Features[]
   images        CarImage[]
   category      Category[]
-  category_id   Int
   rentals       Rental[]
   created_at    DateTime   @default(now())
   updated_at    DateTime   @updatedAt
@@ -64,14 +63,14 @@ model Car {
 }
 
 enum TransType {
-  MANUAL
-  AUTOMATIC
+  Manual
+  Automatic
 }
 
 enum FuelType {
-  BENSIN
-  SOLAR
-  LISTRIK
+  Bensin
+  Solar
+  Listrik
 }
 
 model CarImage {
@@ -90,6 +89,13 @@ model Category {
   category String @db.VarChar(50)
 
   @@map("categories")
+}
+
+model Features {
+  id      Int    @id @default(autoincrement())
+  car_id  Int
+  car     Car    @relation(fields: [car_id], references: [id])
+  feature String @db.Text
 }
 
 model Rental {

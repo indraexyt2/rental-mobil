@@ -9,7 +9,7 @@ const errorMiddleware = async (err, req, res, next) => {
 
     if (err instanceof ResponseError) {
         return res.status(err.status).json({
-            "errors": err.message
+            "errors": Array.isArray(err.message) ? err.message : err.message.split(',')
         });
     } else if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
