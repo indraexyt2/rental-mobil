@@ -57,7 +57,7 @@ export const carSchema = Joi.object({
         .required()
         .messages({
             'any.only': 'Transmission harus Manual atau Automatic!',
-            'any.required': 'Transmission harus diis!i'
+            'any.required': 'Transmission harus diis!'
         }),
 
     capacity: Joi.number()

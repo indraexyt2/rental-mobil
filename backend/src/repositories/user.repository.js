@@ -64,7 +64,8 @@ class UserRepository {
                 select: {
                     id: true,
                     email: true,
-                    full_name: true
+                    full_name: true,
+                    role: true
                 }
             });
         } catch (err) {
