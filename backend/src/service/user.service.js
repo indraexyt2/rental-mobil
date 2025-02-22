@@ -141,6 +141,7 @@ class UserService {
         }
 
         console.log(value);
+        console.log(value.sim_image)
         return await this.userRepo.updateUser(value);
     }
 }

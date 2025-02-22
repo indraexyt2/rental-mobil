@@ -1,24 +1,83 @@
 import Joi from "joi";
 
 export const userSchema = Joi.object({
-    email: Joi.string().email().max(100).required(),
-    password: Joi.string().min(6).max(255).required(),
-    full_name: Joi.string().max(100).required(),
-    phone: Joi.string().max(50).allow(null, ""),
-    address: Joi.string().allow(null, ""),
-    sim_number: Joi.string().max(50).allow(null, ""),
-    sim_image: Joi.string().allow(null, ""),
-    avatar: Joi.string().allow(null, ""),
-    role: Joi.string().valid("USER", "ADMIN").default("USER"),
-    is_verified: Joi.boolean().default(false),
+    email: Joi.string()
+        .email()
+        .max(100)
+        .required()
+        .messages({
+            'string.email': 'Format email tidak valid!',
+            'string.empty': 'Email tidak boleh kosong!',
+            'string.max': 'Email maksimal 100 karakter!',
+            'any.required': 'Email harus diisi!'
+        }),
+
+    password: Joi.string()
+        .min(6)
+        .max(255)
+        .required()
+        .messages({
+            'string.empty': 'Password tidak boleh kosong!',
+            'string.min': 'Password minimal 6 karakter!',
+            'string.max': 'Password maksimal 255 karakter!',
+            'any.required': 'Password harus diisi!'
+        }),
+
+    full_name: Joi.string()
+        .max(100)
+        .required()
+        .messages({
+            'string.empty': 'Nama lengkap tidak boleh kosong!',
+            'string.max': 'Nama lengkap maksimal 100 karakter!',
+            'any.required': 'Nama lengkap harus diisi!'
+        }),
 });
 
 export const userUpdateSchema = Joi.object({
-    email: Joi.string().email().max(100).required(),
-    full_name: Joi.string().max(100).required(),
-    phone: Joi.string().max(50).required(),
-    address: Joi.string().required(),
-    sim_number: Joi.string().max(50).required(),
+    email: Joi.string()
+        .email()
+        .max(100)
+        .required()
+        .messages({
+            'string.email': 'Format email tidak valid!',
+            'string.empty': 'Email tidak boleh kosong!',
+            'string.max': 'Email maksimal 100 karakter!',
+            'any.required': 'Email harus diisi!'
+        }),
+
+    full_name: Joi.string()
+        .max(100)
+        .required()
+        .messages({
+            'string.empty': 'Nama lengkap tidak boleh kosong!',
+            'string.max': 'Nama lengkap maksimal 100 karakter!',
+            'any.required': 'Nama lengkap harus diisi!'
+        }),
+
+    phone: Joi.string()
+        .max(50)
+        .required()
+        .messages({
+            'string.empty': 'Nomor telepon tidak boleh kosong!',
+            'string.max': 'Nomor telepon maksimal 50 karakter!',
+            'any.required': 'Nomor telepon harus diisi!'
+        }),
+
+    address: Joi.string()
+        .required()
+        .messages({
+            'string.empty': 'Alamat tidak boleh kosong!',
+            'any.required': 'Alamat harus diisi!'
+        }),
+
+    sim_number: Joi.string()
+        .max(50)
+        .required()
+        .messages({
+            'string.empty': 'Nomor SIM tidak boleh kosong!',
+            'string.max': 'Nomor SIM maksimal 50 karakter!',
+            'any.required': 'Nomor SIM harus diisi!'
+        })
 });
 
 export const carSchema = Joi.object({
