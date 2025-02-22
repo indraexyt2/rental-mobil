@@ -357,7 +357,6 @@ describe('DELETE /api/users/logout', () => {
 });
 
 describe('GET /api/users/:id', () => {
-    let testUserId;
     let loginCookies;
 
     beforeEach(async () => {
@@ -365,7 +364,7 @@ describe('GET /api/users/:id', () => {
             .post('/api/users/register')
             .send({
                 "email": "test@example.com",
-                "password": "rahasia",
+                "password": "rahasiasekali",
                 "full_name": "test"
             });
 
@@ -384,12 +383,11 @@ describe('GET /api/users/:id', () => {
             .post('/api/users/login')
             .send({
                 "email": "test@example.com",
-                "password": "rahasia"
+                "password": "rahasiasekali"
             });
 
         expect(response.status).toBe(200);
         loginCookies = response.headers['set-cookie'];
-        testUserId = response.body.data.id;
     });
 
     afterEach(async () => {
@@ -398,13 +396,12 @@ describe('GET /api/users/:id', () => {
 
     it('should successfully get user by id', async () => {
         const result = await supertest(app)
-            .get(`/api/users/${testUserId}`)
+            .get(`/api/users/me`)
             .set('Cookie', loginCookies);
 
         expect(result.status).toBe(200);
         expect(result.body.message).toBe("Berhasil!");
         expect(result.body.data).toBeDefined();
-        expect(result.body.data.id).toBe(testUserId);
         expect(result.body.data.email).toBe("test@example.com");
         expect(result.body.data.full_name).toBe("test");
         expect(result.body.data.password).toBeUndefined();
@@ -414,7 +411,7 @@ describe('GET /api/users/:id', () => {
 
     it('should reject if no token provided', async () => {
         const result = await supertest(app)
-            .get(`/api/users/${testUserId}`);
+            .get(`/api/users/me`);
 
         expect(result.status).toBe(401);
         expect(result.body.errors).toBe("Unauthorized");
@@ -422,20 +419,11 @@ describe('GET /api/users/:id', () => {
 
     it('should reject if token is invalid', async () => {
         const result = await supertest(app)
-            .get(`/api/users/${testUserId}`)
+            .get(`/api/users/me`)
             .set('Cookie', ['token=invalid.token.here']);
 
         expect(result.status).toBe(401);
         expect(result.body.errors).toBe("Unauthorized");
-    });
-
-    it('should reject if user id is not found', async () => {
-        const result = await supertest(app)
-            .get('/api/users/999999')
-            .set('Cookie', loginCookies);
-
-        expect(result.status).toBe(200);
-        expect(result.body.data).toBe(null);
     });
 });
 
