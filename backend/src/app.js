@@ -15,7 +15,7 @@ app.use(cookieParser());
     await connectRedis();
 })();
 
-app.use('/api/auth', userRoute);
+app.use('/api/users', userRoute);
 
 app.use(errorMiddleware);
 

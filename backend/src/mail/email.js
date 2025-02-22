@@ -8,7 +8,7 @@ export const sendEmailVerification = async (emailRecipient, verificationToken) =
             from: process.env.MAIL_SENDER,
             to: emailRecipient,
             subject: "Verifikasi Email Anda!",
-            html: EMAIL_SEND_WELCOME.replace("{verification_token}", verificationToken)
+            html: EMAIL_SEND_VERIFICATION.replace("{verification_token}", verificationToken)
         });
         console.info("Email verifikasi terkirim")
     } catch (err) {
@@ -22,7 +22,7 @@ export const sendWelcomeEmail = async (emailRecipient, fullName) => {
             from: process.env.MAIL_SENDER,
             to: emailRecipient,
             subject: "Verifikasi Email Anda!",
-            html: EMAIL_SEND_VERIFICATION.replace("{full_name}", fullName)
+            html: EMAIL_SEND_WELCOME.replace("{full_name}", fullName)
         });
         console.info("Email verifikasi terkirim")
     } catch (err) {
