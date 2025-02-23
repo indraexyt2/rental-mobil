@@ -174,7 +174,7 @@ export const carSchema = Joi.object({
         }),
 
     features: Joi.array()
-        .items(Joi.string())
+        .items(Joi.number())
         .min(1)
         .required()
         .messages({
@@ -183,8 +183,8 @@ export const carSchema = Joi.object({
             'any.required': 'Features harus diisi11!'
         }),
 
-    category: Joi.array()
-        .items(Joi.string())
+    categories: Joi.array()
+        .items(Joi.number())
         .min(1)
         .required()
         .messages({
@@ -209,7 +209,11 @@ export const carSchema = Joi.object({
         .messages({
             'array.min': 'Minimal harus ada 1 gambar!',
             'any.required': 'Minimal harus ada 1 gambar!'
-        })
+        }),
+
+    deleted_image: Joi.array()
+        .items(Joi.number())
+        .min(0)
 })
     .required()
     .messages({

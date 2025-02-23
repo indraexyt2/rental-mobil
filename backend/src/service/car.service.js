@@ -15,7 +15,7 @@ class CarService {
         carData.images = files;
 
         carData.features = carData.features ? JSON.parse(carData.features) : [];
-        carData.category = carData.category ? JSON.parse(carData.category) : [];
+        carData.categories = carData.categories ? JSON.parse(carData.categories) : [];
 
         const {value, error} = carSchema.validate(carData, {abortEarly: false, stripUnknown: true});
         if (error) {
@@ -70,6 +70,124 @@ class CarService {
         }
 
         return await this.carRepo.getCar(parseInt(carId))
+    }
+
+    async updateCar(request) {
+        const carId = request.params.id;
+        const carData = request.body;
+        carData.images = request.files.car;
+
+        carData.deleted_image = carData.deleted_image ? JSON.parse(carData.deleted_image) : [];
+        carData.features = carData.features ? JSON.parse(carData.features) : [];
+        carData.categories = carData.categories ? JSON.parse(carData.categories) : [];
+
+        const {value, error} = carSchema.validate(carData, {
+            abortEarly: false,
+            stripUnknown: true
+        })
+
+        if (error) {
+            for (let i = 0; i < carData.images.length; i++) {
+                await fs.rm(carData.images[i].path)
+            }
+
+            const errors = error.details.map(err =>
+                err.message.trim()
+            );
+
+            throw new ResponseError(400, errors)
+        }
+        return await this.carRepo.updateCar(value, carId);
+    }
+
+    async addCategory(request) {
+        const categoryName = request.body.category_name;
+        if (!categoryName) {
+            throw new ResponseError(400, "Nama kategori wajib diisi!");
+        }
+
+        return await this.carRepo.addCategory(categoryName);
+    }
+
+    async updateCategory(request) {
+        const categoryId = request.params.id;
+        if (!categoryId) {
+            throw new ResponseError(400, "Kategori id dibutuhkan!");
+        }
+
+        const categoryName = request.body.category_name;
+        if (!categoryName) {
+            throw new ResponseError(400, "Nama kategori wajib diisi!");
+        }
+
+        return await this.carRepo.updateCategory(categoryId, categoryName);
+    }
+
+    async delCategory(request) {
+        const categoryId = request.params.id;
+        if (!categoryId) {
+            throw new ResponseError(400, "Kategori id dibutuhkan!");
+        }
+
+        return await this.carRepo.delCategory(categoryId)
+    }
+
+    async getCategory(request) {
+        const categoryId = request.params.id;
+        if (!categoryId) {
+            throw new ResponseError(400, "Kategori id dibutuhkan!");
+        }
+
+        return await this.carRepo.getCategory(categoryId)
+    }
+
+    async getCategories() {
+        return await this.carRepo.getCategories();
+    }
+
+    async addFeature(request) {
+        const featureName = request.body.feature_name;
+        if (!featureName) {
+            throw new ResponseError(400, "Nama feature wajib diisi!");
+        }
+
+        return await this.carRepo.addFeature(featureName);
+    }
+
+    async updateFeature(request) {
+        const featureId = request.params.id;
+        if (!featureId) {
+            throw new ResponseError(400, "Feature id dibutuhkan!");
+        }
+
+        const featureName = request.body.feature_name;
+        if (!featureName) {
+            throw new ResponseError(400, "Nama feature wajib diisi!");
+        }
+
+        return await this.carRepo.updateFeature(featureId, featureName);
+    }
+
+    async delFeature(request) {
+        const featureId = request.params.id;
+        if (!featureId) {
+            throw new ResponseError(400, "Feature id dibutuhkan!");
+        }
+
+        return await this.carRepo.delFeature(featureId)
+    }
+
+    async getFeature(request) {
+        const featureId = request.params.id;
+        if (!featureId) {
+            throw new ResponseError(400, "Feature id dibutuhkan!");
+        }
+
+        return await this.carRepo.getFeature(featureId)
+    }
+
+    async getFeatures() {
+        return await this.carRepo.getFeatures();
     }
 }
 
