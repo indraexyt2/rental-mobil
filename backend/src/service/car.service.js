@@ -100,6 +100,15 @@ class CarService {
         return await this.carRepo.updateCar(value, carId);
     }
 
+    async deleteCar(request) {
+        const carId = request.params.id;
+        if (!carId) {
+            throw new ResponseError(400, "Mobil Id dibutuhkan!");
+        }
+
+        return await this.carRepo.deleteCar(parseInt(carId));
+    }
+
     async addCategory(request) {
         const categoryName = request.body.category_name;
         if (!categoryName) {

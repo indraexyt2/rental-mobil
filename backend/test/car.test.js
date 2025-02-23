@@ -646,4 +646,82 @@ describe('Car API Endpoints', () => {
             expect(response.status).toBe(401);
         });
     });
+
+    describe('DELETE /api/cars/:id', () => {
+        let carId;
+
+        beforeEach(async () => {
+            const car = await prismaClient.car.create({
+                data: {
+                    brand: validCarData.brand,
+                    model: validCarData.model,
+                    year: validCarData.year,
+                    transmission: validCarData.transmission,
+                    capacity: validCarData.capacity,
+                    fuel_type: validCarData.fuel_type,
+                    price_per_day: validCarData.price_per_day,
+                    description: validCarData.description,
+                    mileage: validCarData.mileage
+                }
+            });
+            carId = car.id;
+
+            await prismaClient.carImage.create({
+                data: {
+                    car_id: carId,
+                    image_url: imageTestPath
+                }
+            });
+
+            await prismaClient.categoryOnCars.create({
+                data: {
+                    car_id: carId,
+                    category_id: categoryId
+                }
+            });
+
+            await prismaClient.featureOnCars.create({
+                data: {
+                    car_id: carId,
+                    feature_id: featureId
+                }
+            });
+        });
+
+        it('should delete car and all relations successfully', async () => {
+            const response = await request(app)
+                .delete(`/api/cars/${carId}`)
+                .set('Cookie', adminToken);
+
+            expect(response.status).toBe(200);
+            expect(response.body.message).toBe('Berhasil!');
+
+            const deletedCar = await prismaClient.car.findUnique({
+                where: { id: carId }
+            });
+            expect(deletedCar).toBeNull();
+
+            const carImages = await prismaClient.carImage.findMany({
+                where: { car_id: carId }
+            });
+            expect(carImages).toHaveLength(0);
+
+            const carCategories = await prismaClient.categoryOnCars.findMany({
+                where: { car_id: carId }
+            });
+            expect(carCategories).toHaveLength(0);
+
+            const carFeatures = await prismaClient.featureOnCars.findMany({
+                where: { car_id: carId }
+            });
+            expect(carFeatures).toHaveLength(0);
+        });
+
+        it('should return 401 when not authenticated', async () => {
+            const response = await request(app)
+                .delete(`/api/cars/${carId}`);
+
+            expect(response.status).toBe(401);
+        });
+    });
 });

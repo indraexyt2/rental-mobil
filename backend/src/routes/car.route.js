@@ -10,6 +10,7 @@ car.post('', authAdminMiddleware, upload, carController.addNewCar);
 car.get('', carController.getCars);
 car.get('/:id', carController.getCar);
 car.put('/:id', authAdminMiddleware, upload, carController.updateCar);
+car.delete('/:id', authAdminMiddleware, carController.deleteCar);
 
 car.post('/category', authAdminMiddleware, carController.addCategory);
 car.put('/category/:id', authAdminMiddleware, carController.updateCategory);

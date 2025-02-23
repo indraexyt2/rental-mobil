@@ -166,6 +166,39 @@ class CarsRepository {
         }
     }
 
+    async deleteCar(carId) {
+        try {
+            const result = await this.db.$transaction(async (tx) => {
+                await tx.featureOnCars.deleteMany({
+                    where: { car_id: carId }
+                });
+
+                await tx.categoryOnCars.deleteMany({
+                    where: { car_id: carId }
+                });
+
+                await tx.carImage.deleteMany({
+                    where: { car_id: carId }
+                });
+
+                await tx.rental.deleteMany({
+                    where: { car_id: carId }
+                });
+
+                return await tx.car.delete({
+                    where: { id: carId }
+                });
+            });
+
+            await this.rdb.del("car:all");
+            await this.rdb.del(`car:${result.id}`);
+
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    }
+
     async updateCar(carData, carId) {
         const {deleted_image, images, categories, features, ...CarData} = carData;
         const carIdInt = parseInt(carId)

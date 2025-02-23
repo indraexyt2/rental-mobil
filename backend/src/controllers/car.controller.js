@@ -66,6 +66,19 @@ class CarController {
         }
     }
 
+    deleteCar = async (req, res, next) => {
+        try {
+            const result = await this.carService.deleteCar(req);
+            return res.status(200).json({
+                "message": "Berhasil!",
+                "data": result
+            });
+        } catch (e) {
+            logger.error("Gagal menghapus mobil:", e)
+            next(e);
+        }
+    }
+
     addCategory = async (req, res, next) => {
         try {
             const result = await this.carService.addCategory(req);
