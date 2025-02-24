@@ -1,7 +1,7 @@
 import supertest from "supertest";
 import {logger} from "../src/utils/logger.js";
 import {app} from '../src/app'
-import {removeTestUser} from "./test.utils";
+import {removeTestUser} from "./utils/test.utils.js";
 import {redisClient} from "../src/config/redis.config.js";
 import jwt from "jsonwebtoken";
 import fs from "fs/promises";
@@ -355,7 +355,7 @@ describe('DELETE /api/users/logout', () => {
     });
 });
 
-describe('GET /api/users/:id', () => {
+describe('GET /api/users/me', () => {
     let loginCookies;
 
     beforeEach(async () => {

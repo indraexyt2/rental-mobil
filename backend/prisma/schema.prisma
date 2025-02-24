@@ -41,23 +41,23 @@ enum Role {
 }
 
 model Car {
-  id            Int        @id @default(autoincrement())
-  brand         String     @db.VarChar(50)
-  model         String     @db.VarChar(40)
-  year          Int        @db.SmallInt
+  id            Int              @id @default(autoincrement())
+  brand         String           @db.VarChar(50)
+  model         String           @db.VarChar(40)
+  year          Int              @db.SmallInt
   transmission  TransType
-  capacity      Int        @db.SmallInt
+  capacity      Int              @db.SmallInt
   fuel_type     FuelType
   price_per_day Float
-  is_active     Boolean    @default(true)
-  description   String     @db.Text
+  is_active     Boolean          @default(true)
+  description   String           @db.Text
   mileage       Int
-  features      Features[]
+  features      FeatureOnCars[]
   images        CarImage[]
-  category      Category[]
+  categories    CategoryOnCars[]
   rentals       Rental[]
-  created_at    DateTime   @default(now())
-  updated_at    DateTime   @updatedAt
+  created_at    DateTime         @default(now())
+  updated_at    DateTime         @updatedAt
 
   @@map("cars")
 }
@@ -83,19 +83,37 @@ model CarImage {
 }
 
 model Category {
-  id       Int    @id @default(autoincrement())
-  car_id   Int
-  car      Car    @relation(fields: [car_id], references: [id])
-  category String @db.VarChar(50)
+  id            Int              @id @default(autoincrement())
+  category_name String           @db.VarChar(50)
+  categories    CategoryOnCars[]
 
   @@map("categories")
 }
 
+model CategoryOnCars {
+  car         Car      @relation(fields: [car_id], references: [id])
+  car_id      Int
+  category    Category @relation(fields: [category_id], references: [id])
+  category_id Int
+
+  @@id([car_id, category_id])
+}
+
 model Features {
-  id      Int    @id @default(autoincrement())
-  car_id  Int
-  car     Car    @relation(fields: [car_id], references: [id])
-  feature String @db.Text
+  id       Int             @id @default(autoincrement())
+  feature  String          @db.Text
+  features FeatureOnCars[]
+
+  @@map("features")
+}
+
+model FeatureOnCars {
+  car        Car      @relation(fields: [car_id], references: [id])
+  car_id     Int
+  features   Features @relation(fields: [feature_id], references: [id])
+  feature_id Int
+
+  @@id([car_id, feature_id])
 }
 
 model Rental {
