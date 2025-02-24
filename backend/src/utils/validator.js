@@ -219,3 +219,70 @@ export const carSchema = Joi.object({
     .messages({
         'object.missing': "Semua kolom wajib diisi!"
     });
+
+export const rentalSchema = Joi.object({
+    car_id: Joi.number()
+        .integer()
+        .positive()
+        .required()
+        .messages({
+            'number.base': 'Mobil ID harus berupa angka',
+            'number.integer': 'Mobil ID harus berupa bilangan bulat',
+            'number.positive': 'Mobil ID harus bernilai diatas 0',
+            'any.required': 'Mobil ID wajib diisi'
+        }),
+
+    start_date: Joi.date()
+        .iso()
+        .greater('now')
+        .required()
+        .messages({
+            'date.base': 'Tanggal pengambilan harus berupa tanggal yang valid',
+            'date.format': 'Tanggal pengambilan harus dalam format ISO 8601',
+            'date.greater': 'Tanggal pengambilan harus berupa tanggal yang akan datang',
+            'any.required': 'Tanggal pengambilan wajib diisi'
+        }),
+
+    end_date: Joi.date()
+        .iso()
+        .greater(Joi.ref('start_date'))
+        .required()
+        .messages({
+            'date.base': 'Tanggal pengembalian harus berupa tanggal yang valid',
+            'date.format': 'Tanggal pengembalian harus dalam format ISO 8601',
+            'date.greater': 'Tanggal pengembalian harus setelah start_date',
+            'any.required': 'Tanggal pengembalian wajib diisi'
+        }),
+
+    driver_needed: Joi.boolean()
+});
+
+export const rentalSchemaUpdate = Joi.object({
+    start_date: Joi.date()
+        .iso()
+        .greater('now')
+        .required()
+        .messages({
+            'date.base': 'Tanggal pengambilan harus berupa tanggal yang valid',
+            'date.format': 'Tanggal pengambilan harus dalam format ISO 8601',
+            'date.greater': 'Tanggal pengambilan harus berupa tanggal yang akan datang',
+            'any.required': 'Tanggal pengambilan wajib diisi'
+        }),
+
+    end_date: Joi.date()
+        .iso()
+        .greater(Joi.ref('start_date'))
+        .required()
+        .messages({
+            'date.base': 'Tanggal pengembalian harus berupa tanggal yang valid',
+            'date.format': 'Tanggal pengembalian harus dalam format ISO 8601',
+            'date.greater': 'Tanggal pengembalian harus setelah start_date',
+            'any.required': 'Tanggal pengembalian wajib diisi'
+        }),
+
+    driver_needed: Joi.boolean()
+        .required()
+        .messages({
+            'any.required': 'Driver harus diisi!'
+        })
+})
