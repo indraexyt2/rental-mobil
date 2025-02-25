@@ -48,7 +48,7 @@ class RentalService {
     }
 
     async getRents(request) {
-        const {
+        let {
             status = null,
             start_date = null,
             end_date = null,
@@ -57,6 +57,7 @@ class RentalService {
             limit = 10
         } = request.query;
 
+        car_id = car_id ? parseInt(car_id) : null;
         const filterData = {
             page: parseInt(page),
             limit: parseInt(limit),
@@ -86,7 +87,7 @@ class RentalService {
     }
 
     async getRentsByUserId(request) {
-        const {
+        let {
             status = null,
             start_date = null,
             end_date = null,
@@ -95,6 +96,7 @@ class RentalService {
             limit = 10
         } = request.query;
 
+        car_id = car_id ? parseInt(car_id) : null;
         const user_id = request.claimsToken.id;
         const filterData = {
             page: parseInt(page),
@@ -215,7 +217,7 @@ class RentalService {
             throw new ResponseError(400, "Rental ID dibutuhkan!");
         }
 
-        const statusRent = request.body.status.toUpperCase();
+        const statusRent = request.body.status ? request.body.status.toUpperCase() : null;
         if (!statusRent) {
             throw new ResponseError(400, "Update status dibutuhkan!");
         }
@@ -224,10 +226,13 @@ class RentalService {
             where: { id: parseInt(rentId) },
             select: { status: true }
         });
+        if (!currentRent) {
+            throw new ResponseError(400, "Rental ID tidak valid!");
+        }
 
         const mappingStatus = rentalStatusMapping[currentRent.status];
         if (!mappingStatus || !mappingStatus.includes(statusRent)) {
-            throw new ResponseError(400, "Status tidak valid");
+            throw new ResponseError(400, "Status tidak valid!");
         }
 
         return await this.rentalRepo.updateRentStatus(statusRent, rentId);
@@ -236,7 +241,7 @@ class RentalService {
     async getRentsDates(request) {
         const carId = request.params.id;
         if (!carId) {
-            throw new ResponseError(400, "Car ID dibutuhkan!");
+            throw new ResponseError(400, "Mobil ID dibutuhkan!");
         }
 
         const bookings = await this.rentalRepo.getRentsDates(carId);

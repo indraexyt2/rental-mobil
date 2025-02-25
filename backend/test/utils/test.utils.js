@@ -1,6 +1,7 @@
 import {prismaClient} from "../../src/config/database.config.js";
 import request from "supertest";
 import {app} from "../../src/app.js";
+import {validCarData} from "./mock.data.js";
 
 export const removeTestUser = async () => {
     await prismaClient.user.deleteMany({
@@ -68,6 +69,30 @@ export const registerAdmin = async () => {
 
     expect(response.status).toBe(200);
     expect(response.body.data.email).toBe("admin@test.com");
+
+    response = await request(app)
+        .post('/api/users/email-verification')
+        .send({
+            "token": response.body.data.token
+        });
+
+    expect(response.body.data.token).toBeDefined();
+    expect(response.headers['set-cookie']).toBeDefined()
+    return response.headers['set-cookie'];
+}
+
+export const registerUser = async () => {
+    let response = await request(app)
+        .post('/api/users/register')
+        .send({
+            "email": "user@test.com",
+            "password": "123456789",
+            "full_name": "User",
+            "role": "USER"
+        });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.email).toBe("user@test.com");
 
     response = await request(app)
         .post('/api/users/email-verification')
