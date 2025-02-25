@@ -14,7 +14,7 @@ class CarController {
                 "data": result
             })
         } catch (e) {
-            logger.error("Gagal mendapatkan mobil baru:", e);
+            logger.error("Gagal menambahkan mobil baru:", e);
             next(e);
         }
     }

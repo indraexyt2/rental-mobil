@@ -18,12 +18,16 @@ class CarService {
 
         const {value, error} = carSchema.validate(carData, {abortEarly: false, stripUnknown: true});
         if (error) {
-            const errors = error.details.map(err =>
-                err.message.trim()
-            );
+            const errors = error.details.map(err => err.message.trim());
 
-            for (let i = 0; i < carData.images.length; i++) {
-                await fs.unlink(carData.images[i].path)
+            if (carData.images) {
+                for (let i = 0; i < carData.images.length; i++) {
+                    try {
+                        await fs.unlink(carData.images[i].path)
+                    } catch (e) {
+                        console.log(`Gagal menghapus gambar: ${e}`)
+                    }
+                }
             }
 
             throw new ResponseError(400, errors);

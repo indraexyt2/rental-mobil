@@ -3,6 +3,9 @@ import {ResponseError} from "../error/response.error.js";
 import RentalRepository from "../repositories/rental.repository.js";
 import CarsRepository from "../repositories/cars.repository.js";
 import {rentalStatusMapping} from "../utils/constants.js";
+import {publishToQueue} from "../utils/rabbitmq.js";
+import {logger} from "../utils/logger.js";
+import {prismaClient} from "../config/database.config.js";
 
 class RentalService {
     constructor() {
@@ -44,7 +47,17 @@ class RentalService {
             value.total_price += driverFee;
         }
 
-        return await this.rentalRepo.addNewRent(value, userId);
+        const newRent = await this.rentalRepo.addNewRent(value, userId);
+        const rental_id = newRent.id;
+
+        try {
+            await publishToQueue('new_rental_queue', rental_id);
+            logger.info(`Pesan rental ID: ${rental_id} dikirim ke antrian pembayaran`);
+        } catch (err) {
+            logger.error(`Gagal mengirim pesan ke RabbitMQ: ${err.message}`);
+        }
+
+        return newRent;
     }
 
     async getRents(request) {
@@ -137,12 +150,16 @@ class RentalService {
         const rentId = request.params.id;
         const userId = request.claimsToken.id;
 
-        const currentRent = await this.rentalRepo.db.rental.findUnique({
+        const currentRent = await this.rentalRepo.db.rental.findFirst({
             where: { id: parseInt(rentId) },
             select: {
+                id: true,
                 total_price: true,
                 driver_fee: true,
+                status: true,
                 driver_needed: true,
+                start_date: true,
+                end_date: true,
                 user: {
                     select: { id: true }
                 },
@@ -160,6 +177,11 @@ class RentalService {
             throw new ResponseError(401, "Unauthorized")
         }
 
+        if (currentRent.status !== 'CONFIRMED' && currentRent.status !== 'ACTIVE') {
+            logger.info(`Pembayaran untuk ID rental: ${currentRent.id} belum dibayar!`);
+            throw new ResponseError(400, "Pembayaran sebelumnya belum dibayarkan!");
+        }
+
         const {value, error} = rentalSchemaUpdate.validate(updatedData, {abortEarly: false, stripUnknown: true});
         if (error) {
             const errors = error.details.map(err => err.message.trim());
@@ -173,7 +195,6 @@ class RentalService {
 
         value.total_price = rentDay * currentRent.car.price_per_day;
 
-
         if (currentRent.driver_needed !== value.driver_needed) {
             if (value.driver_needed) {
                 value.driver_fee = driverFee;
@@ -181,30 +202,39 @@ class RentalService {
             } else {
                 value.driver_fee = null;
             }
+        } else if (driverFee > driverFeeCurrent && value.driver_needed === true) {
+            value.total_price += driverFee;
         } else {
             value.total_price += driverFeeCurrent;
-            if (driverFee > driverFeeCurrent && value.driver_needed === true) {
-                value.total_price += driverFee;
-            }
         }
 
         if (value.total_price > currentRent.total_price) {
             const additionalCost = value.total_price - currentRent.total_price;
             value.status = 'PENDING';
+            const updatedData = await this.rentalRepo.updateRent(value, rentId);
+
+            const diffCurrentRentTime = Math.abs(currentRent.start_date - currentRent.end_date);
+            const currentRentDay = Math.ceil( diffCurrentRentTime / (1000 * 60 * 60 * 24));
+            const differentDriverFee = Math.abs(driverFee - driverFeeCurrent);
+
+            updatedData.different_day_driver = differentDriverFee / 150000;
+            updatedData.different_day = rentDay - currentRentDay;
+            updatedData.additional_cost = additionalCost;
 
             // TODO: Implement additional payment handling
+            await publishToQueue('update_rental_queue', updatedData);
             console.log("Additional cost:", additionalCost);
 
-            const updatedData = await this.rentalRepo.updateRent(value, rentId);
             return updatedData;
         } else if (value.total_price < currentRent.total_price) {
             const refundAmount  = currentRent.total_price - value.total_price;
-            console.log(`Current = ${currentRent.total_price} - Update = ${value.total_price} = ${refundAmount}`)
+            const updatedData = await this.rentalRepo.updateRent(value, rentId);
+            updatedData.refund_cost = refundAmount;
 
             // TODO: Handle refund flow
+            await publishToQueue('refund_rental_queue', updatedData)
             console.log("Refund amount:", refundAmount);
 
-            const updatedData = await this.rentalRepo.updateRent(value, rentId);
             return updatedData;
         } else {
             return await this.rentalRepo.updateRent(value, rentId);

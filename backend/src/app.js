@@ -6,8 +6,11 @@ import {logger} from "./utils/logger.js";
 import userRoute from "./routes/user.route.js";
 import carRoute from "./routes/car.route.js"
 import rentalRoute from "./routes/rental.route.js";
+import paymentRoute from "./routes/payment.route.js";
 import {errorMiddleware} from "./middleware/error.middleware.js";
 import {connectRedis} from "./config/redis.config.js";
+import {connectRabbitMq} from "./utils/rabbitmq.js";
+import {startWorkers} from "./workers/payment.worker.js";
 
 export const app = express();
 app.use(express.json());
@@ -15,11 +18,15 @@ app.use(cookieParser());
 
 (async () => {
     await connectRedis();
+    await connectRabbitMq();
+
+    await startWorkers();
 })();
 
 app.use('/api/users', userRoute);
 app.use('/api/cars', carRoute);
 app.use('/api/rentals', rentalRoute);
+app.use('/api/payments', paymentRoute);
 
 app.use(errorMiddleware);
 
