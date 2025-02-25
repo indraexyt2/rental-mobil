@@ -128,6 +128,41 @@ class UserRepository {
         }
     }
 
+    async getUserByIdForJwt(userId) {
+        try {
+            let user = await this.rdb.get(`user:info:${userId}`);
+            if (user) {
+                logger.info("Berhasil mendapatkan data user dari redis!")
+                user = JSON.parse(user);
+                return user;
+            }
+
+            user = await this.db.user.findUnique({
+                where: {
+                    id: parseInt(userId)
+                },
+                select: {
+                    id: true,
+                    email: true,
+                    full_name: true,
+                    role: true
+                },
+            })
+
+            console.log(user)
+
+            const ok = await this.rdb.set(`user:info:${userId}`, JSON.stringify(user), {EX: 60 * 60 * 24});
+            if (ok !== "OK") {
+                logger.warn("Gagal menyimpan data user ke redis!")
+            }
+            logger.info("Berhasil menyimpan data user ke redis!")
+
+            return user;
+        } catch (err) {
+            throw err;
+        }
+    }
+
     async getUsers() {
         try {
             let users = await this.rdb.get("users");

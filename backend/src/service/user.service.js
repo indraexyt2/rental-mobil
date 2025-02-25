@@ -75,7 +75,7 @@ class UserService {
             throw new ResponseError(400, "Kata sandi salah!")
         }
 
-        const userData = await this.userRepo.getUserById(user.id)
+        const userData = await this.userRepo.getUserByIdForJwt(user.id)
         const jwtToken = generateToken(userData, "token");
         const jwtRefreshToken = generateToken(userData, "refreshToken");
 
@@ -99,7 +99,7 @@ class UserService {
             throw new ResponseError(401, "Unauthorized");
         }
 
-        const userData = await this.userRepo.getUserById(claimsToken.id)
+        const userData = await this.userRepo.getUserByIdForJwt(claimsToken.id)
         return generateToken(userData, "token");
     }
 

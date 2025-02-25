@@ -247,7 +247,8 @@ class RentalRepository {
                             model: true,
                             year: true,
                             transmission: true,
-                            capacity: true
+                            capacity: true,
+                            price_per_day: true
                         }
                     },
                     user: {
@@ -303,14 +304,19 @@ class RentalRepository {
 
     async updateRentStatus(statusRent, rentId) {
         try {
-            return await this.db.rental.update({
+            const statusUpdated = this.db.rental.update({
                 where: {
                     id: parseInt(rentId)
                 },
                 data: {
                     status: statusRent
                 }
-            })
+            });
+
+            await this.rdb.del(`rent:${rentId}`);
+            await this.rdb.del(`rent:all`);
+
+            return statusUpdated;
         } catch (e) {
             throw e;
         }
