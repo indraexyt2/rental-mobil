@@ -126,6 +126,7 @@ model Rental {
   end_date      DateTime
   total_price   Float
   driver_needed Boolean      @default(false)
+  driver_fee    Float?
   status        RentalStatus @default(PENDING)
   payment       Payment?
   created_at    DateTime     @default(now())
