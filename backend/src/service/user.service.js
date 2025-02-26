@@ -60,7 +60,7 @@ class UserService {
     }
 
     login = async (request) => {
-        const {email, password} = request;
+        const {email, password, remember_me} = request;
         if (email === "" || password === "") {
             throw new ResponseError(400, "Semua kolom wajib diisi!")
         }
@@ -77,19 +77,24 @@ class UserService {
 
         const userData = await this.userRepo.getUserByIdForJwt(user.id)
         const jwtToken = generateToken(userData, "token");
-        const jwtRefreshToken = generateToken(userData, "refreshToken");
+        let jwtRefreshToken;
 
-        const userSession = {
-            token: jwtToken,
-            refreshToken: jwtRefreshToken
+        if (remember_me) {
+            jwtRefreshToken = generateToken(userData, "refreshToken");
+
+            const userSession = {
+                token: jwtToken,
+                refreshToken: jwtRefreshToken
+            }
+
+            await this.userRepo.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
         }
-
-        await this.userRepo.rdb.set(`user:session:${userData.id}`, JSON.stringify(userSession), {EX: 7 * 60 * 60 * 24})
 
         return {
             id: userData.id,
-            token: jwtToken
-        };
+            token: jwtToken,
+            refreshToken: jwtRefreshToken || null
+        }
     }
 
     refreshToken = async (request) => {

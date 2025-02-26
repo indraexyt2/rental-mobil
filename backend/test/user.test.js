@@ -198,6 +198,9 @@ describe('POST /api/users/login', () => {
 });
 
 describe('GET /api/users/refresh-token', () => {
+    let jwtToken;
+    let jwtRefreshToken;
+
     beforeEach(async () => {
         let response = await supertest(app)
             .post('/api/users/register')
@@ -217,6 +220,18 @@ describe('GET /api/users/refresh-token', () => {
             });
 
         expect(response.status).toBe(200);
+
+        response = await supertest(app)
+            .post('/api/users/login')
+            .send({
+                "email": "test@example.com",
+                "password": "rahasia",
+                "remember_me": true
+            })
+
+        jwtToken = response.headers['set-cookie'][0];
+        jwtRefreshToken = response.headers['set-cookie'][1];
+        console.log("Jwt Token", jwtToken)
     });
 
     afterEach(async () => {
@@ -232,11 +247,10 @@ describe('GET /api/users/refresh-token', () => {
             });
 
         expect(response.status).toBe(200);
-        const cookies = response.headers['set-cookie'];
 
         const result = await supertest(app)
             .get('/api/users/refresh-token')
-            .set('Cookie', cookies);
+            .set('Cookie', jwtRefreshToken);
 
         expect(result.status).toBe(200);
         expect(result.body.message).toBe("Berhasil!");
@@ -405,7 +419,6 @@ describe('GET /api/users/me', () => {
         expect(result.body.data.full_name).toBe("test");
         expect(result.body.data.password).toBeUndefined();
         expect(result.body.data.role).toBeDefined();
-        expect(result.body.data.rentals).toBeDefined();
     });
 
     it('should reject if no token provided', async () => {

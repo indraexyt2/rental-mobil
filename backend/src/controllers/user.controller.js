@@ -51,6 +51,14 @@ class UserController {
                 sameSite: true
             });
 
+            if (result.refreshToken) {
+                res.cookie("refresh_token", result.refreshToken, {
+                    httpOnly: true,
+                    path: "/",
+                    sameSite: true
+                });
+            }
+
             return res.status(200).json({
                 "message": "Berhasil!",
                 "data": result

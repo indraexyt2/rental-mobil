@@ -8,6 +8,9 @@
   },
   "jest": {
     "verbose": true,
+    "transformIgnorePatterns": [
+      "node_modules/(?!(nanoid|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill)/)"
+    ],
     "transform": {
       "^.+\\.[t|j]sx?$": "babel-jest"
     }

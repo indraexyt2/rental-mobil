@@ -809,6 +809,11 @@ describe('PUT /api/rentals/:id', () => {
             driver_needed: true
         };
 
+        await prismaClient.rental.update({
+            where: { id: rentalId },
+            data: { status: 'CONFIRMED' }
+        });
+
         const response = await request(app)
             .put(`/api/rentals/${rentalId}`)
             .set('Cookie', userCookie)
@@ -830,6 +835,11 @@ describe('PUT /api/rentals/:id', () => {
             end_date: '2025-03-10',
             driver_needed: true
         };
+
+        await prismaClient.rental.update({
+            where: { id: rentalId },
+            data: { status: 'CONFIRMED' }
+        });
 
         const response = await request(app)
             .put(`/api/rentals/${rentalId}`)
@@ -854,6 +864,11 @@ describe('PUT /api/rentals/:id', () => {
             driver_needed: false
         };
 
+        await prismaClient.rental.update({
+            where: { id: rentalId },
+            data: { status: 'CONFIRMED' }
+        });
+
         const response = await request(app)
             .put(`/api/rentals/${rentalId}`)
             .set('Cookie', userCookie)
@@ -873,6 +888,11 @@ describe('PUT /api/rentals/:id', () => {
                 end_date: '2025-03-05',
                 driver_needed: false
             });
+
+        await prismaClient.rental.update({
+            where: { id: rentalId },
+            data: { status: 'CONFIRMED' }
+        });
 
         const response = await request(app)
             .put(`/api/rentals/${rentalId}`)
@@ -966,6 +986,11 @@ describe('PUT /api/rentals/:id', () => {
             driver_needed: true
         };
 
+        await prismaClient.rental.update({
+            where: { id: rentalId },
+            data: { status: 'CONFIRMED' }
+        });
+
         const response = await request(app)
             .put(`/api/rentals/${rentalId}`)
             .set('Cookie', userCookie)
@@ -986,6 +1011,11 @@ describe('PUT /api/rentals/:id', () => {
                 end_date: '2025-03-02',
                 driver_needed: true
             });
+
+        await prismaClient.rental.update({
+            where: { id: rentalId },
+            data: { status: 'CONFIRMED' }
+        });
 
         const response = await request(app)
             .put(`/api/rentals/${rentalId}`)
