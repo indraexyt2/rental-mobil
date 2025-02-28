@@ -14,15 +14,13 @@ import {connectRabbitMq} from "./utils/rabbitmq.js";
 import {startWorkers} from "./workers/payment.worker.js";
 
 export const app = express();
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
-
-app.use(cors({
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 (async () => {
     await connectRedis();
