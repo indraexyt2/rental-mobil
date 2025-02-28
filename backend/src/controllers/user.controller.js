@@ -26,7 +26,7 @@ class UserController {
                 httpOnly: true,
                 path: "/",
                 expires: new Date(Date.now() + 60 * 60 * 1000),
-                sameSite: true
+                sameSite: process.env.NODE_ENV === "production"
             });
 
             return res.status(200).json({
@@ -48,14 +48,14 @@ class UserController {
                 httpOnly: true,
                 path: "/",
                 expires: new Date(Date.now() + 60 * 60 * 1000),
-                sameSite: true
+                sameSite: process.env.NODE_ENV === "production"
             });
 
             if (result.refreshToken) {
                 res.cookie("refresh_token", result.refreshToken, {
                     httpOnly: true,
                     path: "/",
-                    sameSite: true
+                    sameSite: process.env.NODE_ENV === "production"
                 });
             }
 
@@ -88,7 +88,7 @@ class UserController {
                httpOnly: true,
                path: "/",
                expires: new Date(Date.now() + 60 * 60 * 1000),
-               sameSite: true
+               sameSite: process.env.NODE_ENV === "production"
            });
 
            return res.status(200).json({
