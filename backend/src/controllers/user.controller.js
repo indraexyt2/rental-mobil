@@ -26,7 +26,7 @@ class UserController {
                 httpOnly: true,
                 path: "/",
                 expires: new Date(Date.now() + 60 * 60 * 1000),
-                sameSite: process.env.NODE_ENV === "production"
+                sameSite: "strict"
             });
 
             return res.status(200).json({
@@ -48,14 +48,14 @@ class UserController {
                 httpOnly: true,
                 path: "/",
                 expires: new Date(Date.now() + 60 * 60 * 1000),
-                sameSite: process.env.NODE_ENV === "production"
+                sameSite: "strict"
             });
 
             if (result.refreshToken) {
                 res.cookie("refresh_token", result.refreshToken, {
                     httpOnly: true,
                     path: "/",
-                    sameSite: process.env.NODE_ENV === "production"
+                    sameSite: "strict"
                 });
             }
 
@@ -88,7 +88,7 @@ class UserController {
                httpOnly: true,
                path: "/",
                expires: new Date(Date.now() + 60 * 60 * 1000),
-               sameSite: process.env.NODE_ENV === "production"
+               sameSite: "strict"
            });
 
            return res.status(200).json({
@@ -107,6 +107,7 @@ class UserController {
         try {
             await this.userService.logout(req);
             res.clearCookie("token");
+            res.clearCookie("refresh_token");
             return res.status(200).json({
                 "message": "Logout berhasil!"
             })
