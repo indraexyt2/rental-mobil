@@ -42,6 +42,7 @@ class UserRepository {
                },
                select: {
                    id: true,
+                   is_verified: true,
                    token_expired: true,
                }
            });
@@ -81,11 +82,28 @@ class UserRepository {
                 },
                 select: {
                     id: true,
+                    is_verified: true,
                     password: true
                 }
             })
         } catch (err) {
             throw err;
+        }
+    }
+
+    async updateTokenVerify(data) {
+        try {
+            await this.db.user.update({
+                where: {
+                    email: data.email,
+                },
+                data: {
+                    token: data.token,
+                    token_expired: data.token_expired
+                }
+            })
+        } catch (e) {
+            throw e;
         }
     }
 

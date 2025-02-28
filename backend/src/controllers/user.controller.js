@@ -69,6 +69,18 @@ class UserController {
         }
     }
 
+    getNewTokenVerify = async (req, res, next) => {
+        try {
+            await this.userService.resendTokenVerify(req);
+            return res.status(200).json({
+                "message": "Berhasil!"
+            })
+        } catch (e) {
+            logger.error("Gagal mendapatkan token baru!")
+            next(e);
+        }
+    }
+
     refreshToken = async (req, res, next) => {
        try {
            const token = await this.userService.refreshToken(req);

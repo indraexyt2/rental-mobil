@@ -1,6 +1,7 @@
 import express from 'express';
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 import {logger} from "./utils/logger.js";
 import userRoute from "./routes/user.route.js";
@@ -15,6 +16,11 @@ import {startWorkers} from "./workers/payment.worker.js";
 export const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
+
+app.use(cors({
+    origin: 'http://localhost:5173',
+}));
 
 (async () => {
     await connectRedis();

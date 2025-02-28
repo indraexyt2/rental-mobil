@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import UserRepository from "../repositories/user.repository.js";
 import {generateToken} from "../utils/jwt.js";
 import {redisClient} from "../config/redis.config.js";
+import request from "supertest";
 
 class UserService {
     constructor() {
@@ -70,6 +71,10 @@ class UserService {
             throw new ResponseError(400, "Alamat email tidak ditemukan!")
         }
 
+        if (user.is_verified === false) {
+            throw new ResponseError(400, "Alamat email belum terverifikasi!")
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch === false) {
             throw new ResponseError(400, "Kata sandi salah!")
@@ -95,6 +100,24 @@ class UserService {
             token: jwtToken,
             refreshToken: jwtRefreshToken || null
         }
+    }
+
+    resendTokenVerify = async (request) => {
+        const userEmail = request.body.email;
+
+        const user = await this.userRepo.getUserByEmail(userEmail);
+        if (!user) {
+            throw new ResponseError(400, "Alamat email belum terdaftar!");
+        }
+
+        const data = {
+            email: userEmail,
+            token: Math.floor(100000 + Math.random() * 900000),
+            token_expired: new Date(Date.now() + 60 * 10 * 1000)
+        };
+
+        // await sendEmailVerification(data.email, data.token);
+        return await this.userRepo.updateTokenVerify(data);
     }
 
     refreshToken = async (request) => {

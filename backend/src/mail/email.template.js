@@ -3,7 +3,7 @@ export const EMAIL_SEND_VERIFICATION = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifikasi Email - Rental Mobil</title>
+    <title>Verifikasi Email - WheelGo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -66,22 +66,22 @@ export const EMAIL_SEND_VERIFICATION = `<!DOCTYPE html>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">Rental Mobil</div>
+            <div class="logo">WheelGo</div>
         </div>
         
         <div class="content">
             <h2>Verifikasi Email Anda</h2>
-            <p>Terima kasih telah mendaftar di Rental Mobil. Untuk menyelesaikan pendaftaran, masukkan kode verifikasi berikut:</p>
+            <p>Terima kasih telah mendaftar di WheelGo. Untuk menyelesaikan pendaftaran, masukkan kode verifikasi berikut:</p>
             
             <div class="verification-code">{verification_token}</div>
             
             <p>Kode verifikasi ini akan kedaluwarsa dalam 10 menit.</p>
-            <p>Jika Anda tidak merasa mendaftar di Rental Mobil, abaikan email ini.</p>
+            <p>Jika Anda tidak merasa mendaftar di WheelGo, abaikan email ini.</p>
         </div>
         
         <div class="footer">
             <p>Email ini dikirim secara otomatis, mohon tidak membalas email ini.</p>
-            <p>© 2025 Rental Mobil. Seluruh hak cipta dilindungi.</p>
+            <p>© 2025 WheelGo. Seluruh hak cipta dilindungi.</p>
         </div>
     </div>
 </body>
@@ -92,7 +92,7 @@ export const EMAIL_SEND_WELCOME = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selamat Datang - Rental Mobil</title>
+    <title>Selamat Datang - WheelGo</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -222,7 +222,7 @@ export const EMAIL_SEND_WELCOME = `<!DOCTYPE html>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">Rental Mobil</div>
+            <div class="logo">WheelGo</div>
         </div>
         
         <div class="content">
@@ -231,7 +231,7 @@ export const EMAIL_SEND_WELCOME = `<!DOCTYPE html>
             </div>
             
             <div class="sub-message">
-                Selamat datang di keluarga Rental Mobil! Kami sangat senang Anda memilih kami sebagai partner perjalanan Anda. Mari mulai petualangan Anda dengan berbagai kemudahan yang kami tawarkan.
+                Selamat datang di keluarga WheelGo! Kami sangat senang Anda memilih kami sebagai partner perjalanan Anda. Mari mulai petualangan Anda dengan berbagai kemudahan yang kami tawarkan.
             </div>
             
             <div class="features-grid">
@@ -285,8 +285,8 @@ export const EMAIL_SEND_WELCOME = `<!DOCTYPE html>
         
         <div class="footer">
             <p>Ada pertanyaan? Tim support kami siap membantu 24/7<br>
-            Email: support@rentalmobil.com | WhatsApp: 0812-xxxx-xxxx</p>
-            <p>© 2025 Rental Mobil. Seluruh hak cipta dilindungi.</p>
+            Email: support@wheelgo.com | WhatsApp: 0812-xxxx-xxxx</p>
+            <p>© 2025 WheelGo. Seluruh hak cipta dilindungi.</p>
         </div>
     </div>
 </body>
