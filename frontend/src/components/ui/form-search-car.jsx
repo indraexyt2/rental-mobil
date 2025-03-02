@@ -86,7 +86,7 @@ export default function CarSearchBar() {
                         >
                             {formData.modelName
                                 ? modelOptions.find((model) => model.value === formData.modelName)?.label
-                                : "Pilih model"}
+                                : "Pilih car-model"}
                             <ChevronsUpDown className="opacity-50" />
                         </Button>
                     </PopoverTrigger>

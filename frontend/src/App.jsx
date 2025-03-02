@@ -2,7 +2,7 @@ import {BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "@/components/layout/main-layout.jsx";
 import HomePage from "@/pages/home-page.jsx";
 import AuthPage from "@/pages/auth-page.jsx";
-import DashboardPage from "@/pages/dashboard-page.jsx";
+import AdminDashboard from "@/pages/admin-dashboard-page.jsx";
 
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
                 </Route>
 
                 <Route>
-                    <Route path={'/dashboard'} element={<DashboardPage />} />
+                    <Route path={'/admin/dashboard'} element={<AdminDashboard />} />
                 </Route>
             </Routes>
         </BrowserRouter>
