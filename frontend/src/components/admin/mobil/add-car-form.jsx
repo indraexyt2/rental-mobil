@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,38 +26,26 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-const mockCategories = [
-    { id: 1, category_name: "SUV" },
-    { id: 2, category_name: "Sedan" },
-    { id: 3, category_name: "MPV" },
-    { id: 4, category_name: "Hatchback" },
-    { id: 5, category_name: "Sport" },
-    { id: 6, category_name: "Luxury" },
-    { id: 7, category_name: "Family" },
-    { id: 8, category_name: "Electric" }
-];
-
-const mockFeatures = [
-    { id: 1, feature_name: "AC" },
-    { id: 2, feature_name: "Bluetooth" },
-    { id: 3, feature_name: "Rear Camera" },
-    { id: 4, feature_name: "Sunroof" },
-    { id: 5, feature_name: "Leather Seats" },
-    { id: 6, feature_name: "Navigation" },
-    { id: 7, feature_name: "Power Windows" },
-    { id: 8, feature_name: "Keyless Entry" },
-    { id: 9, feature_name: "Cruise Control" },
-    { id: 10, feature_name: "Airbags" }
-];
+import {useCarStore} from "@/store/car-store.js";
 
 const MultiSelect = ({ options, selected, onChange, placeholder, label, searchPlaceholder }) => {
     const [open, setOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const getItemName = (id) => {
         const option = options.find(option => option.id.toString() === id);
-        return option ? (option.category_name || option.feature_name) : id;
+        return option ? (option.category_name || option.feature) : id;
     };
+
+    const filteredOptions = options.filter(option => {
+        // Make sure option exists and has a name property
+        if (!option) return false;
+        const name = option.category_name || option.feature || '';
+        return name.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+
+    // Get names of all selected items for display
+    const selectedNames = selected.map(id => getItemName(id));
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -68,14 +56,12 @@ const MultiSelect = ({ options, selected, onChange, placeholder, label, searchPl
                     aria-expanded={open}
                     className="w-full justify-between bg-background hover:bg-background border border-input"
                 >
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1 overflow-hidden">
                         {selected.length === 0 ? (
                             <span className="text-muted-foreground">{placeholder}</span>
                         ) : (
-                            <div className="flex items-center">
-                <span>
-                  {selected.length} {label} dipilih
-                </span>
+                            <div className="truncate">
+                                {selectedNames.join(', ')}
                             </div>
                         )}
                     </div>
@@ -88,13 +74,15 @@ const MultiSelect = ({ options, selected, onChange, placeholder, label, searchPl
                     <input
                         className="flex h-9 w-full rounded-md bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder={searchPlaceholder || "Cari..."}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
                 <ScrollArea className="h-60">
                     <div className="p-1">
-                        {options.map((option) => {
+                        {filteredOptions.length > 0 ? filteredOptions.map((option) => {
                             const id = option.id.toString();
-                            const name = option.category_name || option.feature_name;
+                            const name = option.category_name || option.feature;
                             const isSelected = selected.includes(id);
 
                             return (
@@ -121,8 +109,7 @@ const MultiSelect = ({ options, selected, onChange, placeholder, label, searchPl
                                     <span>{name}</span>
                                 </div>
                             );
-                        })}
-                        {options.length === 0 && (
+                        }) : (
                             <div className="py-6 text-center text-sm text-muted-foreground">
                                 Tidak ada data yang tersedia
                             </div>
@@ -178,7 +165,22 @@ const MultiSelect = ({ options, selected, onChange, placeholder, label, searchPl
 
 const AddMobilForm = ({ onBack }) => {
     const [uploadedImages, setUploadedImages] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const { addCar, getModels, getFeatures, models, features, isLoading, error, resetError } = useCarStore();
+
+    // Load categories and features from the API when component mounts
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                await getModels();
+                await getFeatures();
+            } catch (e) {
+                console.log("Err", e)
+            }
+        }
+
+        fetchData()
+
+    }, [getModels, getFeatures]);
 
     const formSchema = z.object({
         brand: z.string().min(1, { message: "Brand mobil wajib diisi" }),
@@ -190,7 +192,7 @@ const AddMobilForm = ({ onBack }) => {
         price_per_day: z.string().min(1, { message: "Harga per hari wajib diisi" }),
         description: z.string().min(1, { message: "Deskripsi mobil wajib diisi" }),
         mileage: z.string().min(1, { message: "Kilometer mobil wajib diisi" }),
-        categories: z.array(z.string()).min(1, { message: "Minimal pilih satu kategori" }),
+        categories: z.array(z.string()).min(1, { message: "Minimal pilih satu model" }),
         features: z.array(z.string()).min(1, { message: "Minimal pilih satu fitur" }),
     });
 
@@ -230,41 +232,55 @@ const AddMobilForm = ({ onBack }) => {
         setUploadedImages(uploadedImages.filter(image => image.id !== id));
     };
 
-    const onSubmit = (data) => {
-        setIsLoading(true);
-
+    const onSubmit = async (data) => {
         if (uploadedImages.length === 0) {
             toast.error("Minimal satu gambar mobil harus diunggah");
-            setIsLoading(false);
             return;
         }
 
-        const formData = new FormData();
+        // Extract just the file objects for submission
+        const imageFiles = uploadedImages.map(image => image.file);
 
-        Object.keys(data).forEach(key => {
-            if (key === 'categories' || key === 'features') {
-                formData.append(key, JSON.stringify(data[key]));
-            } else {
-                formData.append(key, data[key]);
-            }
-        });
+        try {
+            // Prepare data for submission
+            const carData = {
+                ...data,
+                car: imageFiles // Pass the file objects directly
+            };
 
-        uploadedImages.forEach((image) => {
-            formData.append(`car`, image.file);
-        });
-
-        setTimeout(() => {
-            console.log("Form Data:", data);
-            console.log("Uploaded Images:", uploadedImages);
+            // Submit to the API using our store
+            await addCar(carData);
 
             toast.success("Mobil berhasil ditambahkan!");
-            setIsLoading(false);
 
+            // Reset form and uploaded images
             form.reset();
             setUploadedImages([]);
 
-        }, 1500);
+            // Optionally, go back to the previous screen
+            if (onBack) onBack();
+
+        } catch (error) {
+            // Error will be handled by the store and set in the error state
+            if (Array.isArray(error)) {
+                error.forEach(err => toast.error(err));
+            } else {
+                toast.error("Gagal menambahkan mobil. Silakan coba lagi.");
+            }
+        }
     };
+
+    // Show error notifications when error state changes
+    useEffect(() => {
+        if (error) {
+            if (Array.isArray(error)) {
+                error.forEach(err => toast.error(err));
+            } else if (typeof error === 'string') {
+                toast.error(error);
+            }
+            resetError();
+        }
+    }, [error, resetError]);
 
     return (
         <Card className="border-gray-200 shadow-sm">
@@ -399,9 +415,8 @@ const AddMobilForm = ({ onBack }) => {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="Automatic">Automatic</SelectItem>
                                                 <SelectItem value="Manual">Manual</SelectItem>
-                                                <SelectItem value="CVT">CVT</SelectItem>
+                                                <SelectItem value="Automatic">Automatic</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -454,7 +469,6 @@ const AddMobilForm = ({ onBack }) => {
                                                 <SelectItem value="Bensin">Bensin</SelectItem>
                                                 <SelectItem value="Solar">Solar</SelectItem>
                                                 <SelectItem value="Listrik">Listrik</SelectItem>
-                                                <SelectItem value="Hybrid">Hybrid</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -514,15 +528,15 @@ const AddMobilForm = ({ onBack }) => {
                             name="categories"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Kategori</FormLabel>
+                                    <FormLabel>Model</FormLabel>
                                     <FormControl>
                                         <MultiSelect
-                                            options={mockCategories}
+                                            options={models || []}
                                             selected={field.value}
                                             onChange={field.onChange}
-                                            placeholder="Pilih kategori..."
-                                            label="kategori"
-                                            searchPlaceholder="Cari kategori..."
+                                            placeholder="Pilih model..."
+                                            label="model"
+                                            searchPlaceholder="Cari model..."
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -538,7 +552,7 @@ const AddMobilForm = ({ onBack }) => {
                                     <FormLabel>Fitur</FormLabel>
                                     <FormControl>
                                         <MultiSelect
-                                            options={mockFeatures}
+                                            options={features || []}
                                             selected={field.value}
                                             onChange={field.onChange}
                                             placeholder="Pilih fitur..."
@@ -556,6 +570,7 @@ const AddMobilForm = ({ onBack }) => {
                                 type="button"
                                 variant="outline"
                                 onClick={onBack}
+                                disabled={isLoading}
                             >
                                 Batal
                             </Button>

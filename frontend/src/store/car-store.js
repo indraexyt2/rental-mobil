@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import axios from 'axios';
-import feature from "@/components/admin/feature/feature.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL;
 axios.defaults.withCredentials = true;
@@ -15,6 +14,12 @@ export const useCarStore = create((set) => ({
     features: null,
     error: null,
     isLoading: false,
+    pagination: {
+        page: 1,
+        limit: 10,
+        total_data: 0,
+        total_page: 1
+    },
 
     addModel: async (modelName) => {
         try {
@@ -87,7 +92,6 @@ export const useCarStore = create((set) => ({
             set({ isLoading: true });
             const response = await axios.get(`${API_URL}/api/cars/feature/all`);
             set({ features: response.data.data, isLoading: false });
-            console.log(response.data.data)
         } catch (e) {
             set({ error: e.response?.data?.errors || e.message, isLoading: false });
             console.log("Errors", e.response?.data?.errors || e.message);
@@ -113,6 +117,118 @@ export const useCarStore = create((set) => ({
         try {
             set({ isLoading: true });
             await axios.delete(`${API_URL}/api/cars/feature/${featureId}`);
+            set({ isLoading: false });
+        } catch (e) {
+            set({ error: e.response?.data?.errors || e.message, isLoading: false });
+            console.log("Errors", e.response?.data?.errors || e.message);
+            throw e;
+        }
+    },
+
+    addCar: async (carData) => {
+        try {
+            set({ isLoading: true });
+            const formData = new FormData();
+
+            // Add text data
+            Object.keys(carData).forEach(key => {
+                if (key === 'car') {
+                    // Handle car images - multiple file uploads
+                    carData.car.forEach(imageFile => {
+                        formData.append('car', imageFile);
+                    });
+                } else if (key === 'categories' || key === 'features') {
+                    // Handle arrays
+                    formData.append(key, JSON.stringify(carData[key]));
+                } else {
+                    // Handle other form fields
+                    formData.append(key, carData[key]);
+                }
+            });
+
+            const response = await axios.post(`${API_URL}/api/cars`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            set({ car: response.data.data, isLoading: false });
+            return response.data;
+        } catch (e) {
+            set({ error: e.response?.data?.errors || e.message, isLoading: false });
+            console.log("Errors", e.response?.data?.errors || e.message);
+            throw e;
+        }
+    },
+
+    getCars: async (queryParams = '') => {
+        try {
+            set({ isLoading: true });
+            const response = await axios.get(`${API_URL}/api/cars${queryParams ? `?${queryParams}` : ''}`);
+            set({
+                cars: response.data.data.cars,
+                pagination: response.data.data.pagination,
+                isLoading: false
+            });
+            return response.data;
+        } catch (e) {
+            set({ error: e.response?.data?.errors || e.message, isLoading: false });
+            console.log("Errors", e.response?.data?.errors || e.message);
+            throw e;
+        }
+    },
+
+    getCar: async (carId) => {
+        try {
+            set({ isLoading: true });
+            const response = await axios.get(`${API_URL}/api/cars/${carId}`);
+            set({ car: response.data.data, isLoading: false });
+            return response.data;
+        } catch (e) {
+            set({ error: e.response?.data?.errors || e.message, isLoading: false });
+            console.log("Errors", e.response?.data?.errors || e.message);
+            throw e;
+        }
+    },
+
+    updateCar: async (carId, carData) => {
+        try {
+            set({ isLoading: true });
+            const formData = new FormData();
+
+            Object.keys(carData).forEach(key => {
+                if (key === 'car' && Array.isArray(carData.car)) {
+                    carData.car.forEach(imageFile => {
+                        if (imageFile instanceof File) {
+                            formData.append('car', imageFile);
+                        }
+                    });
+                } else if (key === 'categories' || key === 'features') {
+                    formData.append(key, JSON.stringify(carData[key]));
+                } else {
+                    formData.append(key, carData[key]);
+                }
+            });
+
+            const response = await axios.put(`${API_URL}/api/cars/${carId}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            set({ car: response.data.data, isLoading: false });
+            return response.data;
+        } catch (e) {
+            set({ error: e.response?.data?.errors || e.message, isLoading: false });
+            console.log("Errors", e.response?.data?.errors || e.message);
+            throw e;
+        }
+    },
+
+    deleteCar: async (carId) => {
+        try {
+            set({ isLoading: true });
+            await axios.delete(`${API_URL}/api/cars/${carId}`);
             set({ isLoading: false });
         } catch (e) {
             set({ error: e.response?.data?.errors || e.message, isLoading: false });
