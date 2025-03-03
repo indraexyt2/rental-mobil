@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Car, LayoutGrid, ChevronDown } from 'lucide-react';
 import {
     Sidebar,
@@ -15,7 +16,25 @@ import {
 
 import UserMenu from './user-menu.jsx';
 
+const viewToPath = {
+    'main-dashboard': '/admin/dashboard',
+    'cars': '/admin/cars',
+    'models': '/admin/models',
+    'features': '/admin/features',
+    'reservation': '/admin/reservations',
+    'customer': '/admin/customers',
+    'payment': '/admin/payments',
+    'income-report': '/admin/reports/income',
+    'order-report': '/admin/reports/orders'
+};
+
 const SidebarNav = ({ onMenuClick, activeView }) => {
+    const location = useLocation();
+    
+    const isActive = (menuItem) => {
+        return activeView === menuItem;
+    };
+
     return (
         <Sidebar variant="inset">
             <SidebarHeader className="border-b border-sidebar-border p-4">
@@ -42,7 +61,7 @@ const SidebarNav = ({ onMenuClick, activeView }) => {
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     tooltip="Dashboard"
-                                    isActive={activeView === 'main-dashboard'}
+                                    isActive={isActive('main-dashboard')}
                                     onClick={() => onMenuClick('main-dashboard')}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -67,7 +86,7 @@ const SidebarNav = ({ onMenuClick, activeView }) => {
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     tooltip="Mobil"
-                                    isActive={activeView === 'cars'}
+                                    isActive={isActive('cars')}
                                     onClick={() => onMenuClick('cars')}
                                 >
                                     <Car className="h-4 w-4" />
@@ -77,7 +96,7 @@ const SidebarNav = ({ onMenuClick, activeView }) => {
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     tooltip="Fitur"
-                                    isActive={activeView === 'features'}
+                                    isActive={isActive('features')}
                                     onClick={() => onMenuClick('features')}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -90,7 +109,7 @@ const SidebarNav = ({ onMenuClick, activeView }) => {
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     tooltip="Model"
-                                    isActive={activeView === 'models'}
+                                    isActive={isActive('models')}
                                     onClick={() => onMenuClick('models')}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -115,7 +134,7 @@ const SidebarNav = ({ onMenuClick, activeView }) => {
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     tooltip="Reservasi"
-                                    isActive={activeView === 'reservation'}
+                                    isActive={isActive('reservation')}
                                     onClick={() => onMenuClick('reservation')}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -128,7 +147,7 @@ const SidebarNav = ({ onMenuClick, activeView }) => {
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     tooltip="Pelanggan"
-                                    isActive={activeView === 'customer'}
+                                    isActive={isActive('customer')}
                                     onClick={() => onMenuClick('customer')}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -143,7 +162,7 @@ const SidebarNav = ({ onMenuClick, activeView }) => {
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     tooltip="Pembayaran"
-                                    isActive={activeView === 'payment'}
+                                    isActive={isActive('payment')}
                                     onClick={() => onMenuClick('payment')}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -167,7 +186,7 @@ const SidebarNav = ({ onMenuClick, activeView }) => {
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     tooltip="Laporan Pendapatan"
-                                    isActive={activeView === 'income-report'}
+                                    isActive={isActive('income-report')}
                                     onClick={() => onMenuClick('income-report')}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -181,7 +200,7 @@ const SidebarNav = ({ onMenuClick, activeView }) => {
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     tooltip="Laporan Orderan"
-                                    isActive={activeView === 'order-report'}
+                                    isActive={isActive('order-report')}
                                     onClick={() => onMenuClick('order-report')}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
